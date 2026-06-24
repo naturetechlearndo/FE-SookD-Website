@@ -1,0 +1,151 @@
+import { Order } from "../models/Order";
+import { generateNextId } from "../utils/idGenerator";
+import { getSheetData } from "./googleSheetService";
+
+export async function getOrders()
+    : Promise<Order[]> {
+    const data = await getSheetData("orders");
+
+    return data.map((item: any) => ({
+        order_id: item.order_id,
+        user_id: item.user_id,
+        date: Date(item.order_date),
+        item_id: item.item_id,
+        quantity: item.quantity,
+        total_price: item.total_price,
+        status: item.order_status,
+        shipping_address: item.shipping_address,
+        applied_promotion_id: item.applied_promotion_id
+    }));
+}
+
+export async function getOrderById(
+    id: string
+): Promise<Order | undefined> {
+
+    const orders = await getOrders();
+
+    return orders.find(
+        order => order.order_id === id
+    );
+}
+
+
+export async function createOrder(
+    orderData: Omit<Order, "order_id">
+): Promise<Order> {
+
+    const orders =
+        await getOrders();
+
+    const orderId =
+        generateNextId(
+            orders.map(
+                o => o.order_id
+            ),
+            "ORD"
+        );
+
+    const newOrder: Order = {
+        order_id: orderId,
+        ...orderData
+    };
+
+    await fetch(
+        process.env.GAS_URL!,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+            body: JSON.stringify({
+                action: "createOrder",
+                data: newOrder ?? {}
+            })
+        }
+    );
+
+    return newOrder;
+}
+
+// delete //
+export async function deleteOrder(
+    id: string
+): Promise<boolean> {
+
+    const response = await fetch(
+        process.env.GAS_URL!,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "deleteOrder",
+                order_id: id
+            })
+        }
+    );
+
+    const result = await response.json();
+
+    return result.success;
+}
+
+// update //
+export async function updateOrder(
+    id: string,
+    order: Partial<Order>
+): Promise<Order> {
+
+
+    const cleanOrder = Object.fromEntries(
+        Object.entries(order).filter(([_, v]) => v !== undefined)
+    );
+    const response = await fetch(
+        process.env.GAS_URL!,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "updateOrder",
+                order_id: id,
+                data: cleanOrder
+            })
+        }
+    );
+
+    const result = await response.json();
+
+    if (!result.success) {
+        console.log(result);
+        throw new Error("Update failed");
+    }
+
+    return result.order;
+}
+
+export async function getOrdersByItemId(
+    itemId: string
+): Promise<Order[]> {
+
+    const orders = await getOrders();
+
+    return orders.filter(
+        order => order.item_id === itemId
+    );
+}
+
+export async function getOrdersByUserId(
+    userId: string
+): Promise<Order[]> {
+
+    const orders = await getOrders();
+
+    return orders.filter(
+        order => order.user_id === userId
+    );
+}

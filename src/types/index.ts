@@ -1,6 +1,32 @@
+export interface FeatureSection {
+  id: string;
+  heading: string;
+  body: string;
+  imageUrl: string;
+  imageAlt: string;
+  imagePosition?: 'left' | 'right';
+  eyebrow?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
 export interface NavLink {
   label: string;
   href: string;
+  page?: string;
+}
+
+export interface ExperienceCard {
+  id: string;
+  image: string;
+  imageColor: string;
+  discount: number;
+  discountNote: string;
+  title: string;
+  tags: string[];
+  duration: string;
+  price: number;
+  description: string;
 }
 
 export interface JourneyCard {
@@ -37,6 +63,10 @@ export interface FooterData {
 
 export interface SiteContent {
   navLinks: NavLink[];
+  experiences: {
+    hero: { heading: string; subheading: string };
+    cards: ExperienceCard[];
+  };
   hero: {
     heading: string;
     subheading: string;

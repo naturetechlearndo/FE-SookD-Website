@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment variables (ห้าม push เด็ดขาด)
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+
+# Vite cache
+.vite/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
