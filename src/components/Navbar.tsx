@@ -5,9 +5,10 @@ interface NavbarProps {
   links: NavLink[];
   onNavigate?: (page: string) => void;
   currentPage?: string;
+  lightTop?: boolean;
 }
 
-export default function Navbar({ links, onNavigate, currentPage = 'home' }: NavbarProps) {
+export default function Navbar({ links, onNavigate, currentPage = 'home', lightTop = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home' }: Navb
   };
 
   return (
-    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
+    <nav className={`navbar ${(scrolled || lightTop) ? 'navbar--scrolled' : ''}`}>
       {/* Logo */}
       <a href="/" className="navbar__logo" aria-label="SookD Home" onClick={handleLogo}>
         <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />

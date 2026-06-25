@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StartJourney from './components/StartJourney';
@@ -9,21 +9,47 @@ import SocialImpact from './components/SocialImpact';
 import Footer from './components/Footer';
 import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
 import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
+import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetailPage';
 import { SITE_CONTENT as c } from './constants/content';
 
-type Page = 'home' | 'experiences' | 'activity-detail';
+type Page = 'home' | 'experiences' | 'activity-detail' | 'product-detail';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [prevPage, setPrevPage] = useState<Page>('experiences');
+
+  useEffect(() => {
+    window.history.replaceState({ page: 'home' }, '');
+    const handlePop = (e: PopStateEvent) => {
+      const s = e.state;
+      if (!s?.page) { setPage('home'); return; }
+      if (s.activityId) setSelectedActivityId(s.activityId);
+      if (s.productId) setSelectedProductId(s.productId);
+      if (s.prevPage) setPrevPage(s.prevPage);
+      setPage(s.page);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
 
   function navigate(p: string) {
+    window.history.pushState({ page: p }, '');
     setPage(p as Page);
   }
 
   function openActivity(id: string) {
     setSelectedActivityId(id);
+    window.history.pushState({ page: 'activity-detail', activityId: id }, '');
     setPage('activity-detail');
+  }
+
+  function openProduct(id: string, from: Page = 'activity-detail') {
+    setSelectedProductId(id);
+    setPrevPage(from);
+    window.history.pushState({ page: 'product-detail', productId: id, prevPage: from }, '');
+    setPage('product-detail');
   }
 
   return (
@@ -31,10 +57,13 @@ export default function App() {
       <style>{CSS}</style>
       <style>{EXPERIENCES_CSS}</style>
       <style>{ACTIVITY_DETAIL_CSS}</style>
-      <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} />
+      <style>{PRODUCT_DETAIL_CSS}</style>
+      <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'} />
 
-      {page === 'activity-detail' ? (
-        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} />
+      {page === 'product-detail' ? (
+        <ProductDetailPage productId={selectedProductId} onBack={() => setPage(prevPage)} onSelectProduct={(id) => openProduct(id, prevPage)} />
+      ) : page === 'activity-detail' ? (
+        <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} onSelectProduct={(id) => openProduct(id, 'activity-detail')} />
       ) : page === 'experiences' ? (
         <ExperiencesPage onSelectActivity={openActivity} />
       ) : (

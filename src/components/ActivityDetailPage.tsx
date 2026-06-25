@@ -6,6 +6,7 @@ import { SITE_CONTENT as c } from '../constants/content';
 interface Props {
   activityId: string;
   onBack: () => void;
+  onSelectProduct?: (id: string) => void;
 }
 
 function driveThumb(url: string, size = 'w800'): string {
@@ -29,7 +30,7 @@ function Stars({ rating, size = 16, emptyFill = '#e0e0e0' }: { rating: number; s
   );
 }
 
-export default function ActivityDetailPage({ activityId, onBack }: Props) {
+export default function ActivityDetailPage({ activityId, onBack, onSelectProduct }: Props) {
   const [activity, setActivity] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -37,6 +38,8 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [reviewIdx, setReviewIdx] = useState(0);
   const [productIdx, setProductIdx] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const isLoggedIn = false;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -101,7 +104,7 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
                   {avgRating > 0 ? Math.ceil(avgRating) : '—'}
                 </span>
                 <svg width="18" height="18" viewBox="0 0 24 24"
-                  fill="none" stroke="#f5a623" strokeWidth="1.5" className="adet__rating-star">
+                  fill="none" stroke="var(--text)" strokeWidth="1.5" className="adet__rating-star">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
               </div>
@@ -130,7 +133,7 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
               {Number(activity.price).toLocaleString()} Baht
             </div>
 
-            <button className="adet__reserve">Reserve a Spot</button>
+            <button className="adet__reserve" onClick={() => { if (!isLoggedIn) setShowLoginModal(true); }}>Reserve a Spot</button>
           </div>
         </div>
 
@@ -246,7 +249,8 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
 
               <div className="adet__products">
                 {products.slice(productIdx, productIdx + PRODUCTS_PER_PAGE).map((p: any) => (
-                  <div key={p.id} className="adet__product-card">
+                  <div key={p.id} className="adet__product-card" style={{ cursor: onSelectProduct ? 'pointer' : 'default' }}
+                    onClick={() => onSelectProduct?.(p.id)}>
                     <div className="adet__product-img-wrap" style={{ background: '#3d5a3d' }}>
                       <img src={driveThumb(p.image, 'w300')} alt={p.name} className="adet__product-img"
                         onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
@@ -257,7 +261,7 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
                         <span className="adet__product-origin">{p.origin}</span>
                       </div>
                       <div className="adet__product-meta">
-                        <span className="adet__product-qty">{p.quantity}</span>
+                        <span className="adet__product-qty">สินค้าคงเหลือ: {p.remain ?? 0}</span>
                         <span className="adet__product-price">{Number(p.price).toLocaleString()} Baht</span>
                       </div>
                       <p className="adet__product-note">{p.note?.slice(0, 60)}{p.note?.length > 60 ? '…' : ''}</p>
@@ -278,6 +282,26 @@ export default function ActivityDetailPage({ activityId, onBack }: Props) {
       </div>
       <div className="section-gap" />
       <Footer data={c.footer} />
+
+      {/* ── Login Modal ── */}
+      {showLoginModal && (
+        <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>
+          <div className="adet__modal" onClick={e => e.stopPropagation()}>
+            <button className="adet__modal-close" onClick={() => setShowLoginModal(false)}>✕</button>
+            <h3 className="adet__modal-title">Sign in to Continue</h3>
+            <p className="adet__modal-msg">Please log in or register an account to add items to your cart and proceed with checkout.</p>
+            <div className="adet__modal-actions">
+              <button className="adet__modal-login">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Login/Register
+              </button>
+              <button className="adet__modal-later" onClick={() => setShowLoginModal(false)}>Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -482,6 +506,59 @@ export const ACTIVITY_DETAIL_CSS = `
 .adet__product-qty { font-size: .78rem; color: #888; font-family: var(--font-th); }
 .adet__product-price { font-size: .85rem; font-weight: 600; color: var(--forest); }
 .adet__product-note { font-size: .72rem; color: #aaa; font-family: var(--font-th); line-height: 1.4; }
+
+/* Login Modal */
+.adet__modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.adet__modal {
+  position: relative;
+  background: var(--white);
+  border: 2px solid #a8c5b5;
+  border-radius: 16px;
+  padding: 2.2rem 2.4rem 2rem;
+  width: 460px; max-width: 92vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,.15);
+  text-align: center;
+}
+.adet__modal-close {
+  position: absolute; top: 1rem; right: 1.1rem;
+  background: none; border: none; cursor: pointer;
+  color: #888; font-size: 1.2rem; line-height: 1;
+  padding: .2rem .4rem;
+  transition: color .2s;
+}
+.adet__modal-close:hover { color: #333; }
+.adet__modal-title {
+  font-size: 1.45rem; font-weight: 700;
+  color: var(--forest); margin-bottom: .75rem;
+  font-family: Georgia, serif;
+}
+.adet__modal-msg {
+  font-size: .9rem; color: #777;
+  line-height: 1.65;
+  margin-bottom: 1.8rem;
+  max-width: 320px; margin-left: auto; margin-right: auto;
+}
+.adet__modal-actions { display: flex; gap: 1rem; justify-content: center; }
+.adet__modal-login {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .7rem 1.6rem; border-radius: 50px;
+  background: var(--forest); color: var(--white);
+  border: none; font-size: .92rem; font-weight: 600;
+  cursor: pointer; transition: background .2s;
+}
+.adet__modal-login:hover { background: #1a3d2e; }
+.adet__modal-later {
+  padding: .7rem 1.6rem; border-radius: 50px;
+  background: var(--white); color: var(--forest);
+  border: 1.5px solid var(--forest);
+  font-size: .92rem; font-weight: 500;
+  cursor: pointer; transition: all .2s;
+}
+.adet__modal-later:hover { background: #f0f7f4; }
 
 /* Responsive */
 @media(max-width: 768px) {
