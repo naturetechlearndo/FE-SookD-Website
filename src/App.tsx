@@ -11,15 +11,18 @@ import ExperiencesPage, { EXPERIENCES_CSS } from './components/ExperiencesPage';
 import ActivityDetailPage, { ACTIVITY_DETAIL_CSS } from './components/ActivityDetailPage';
 import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetailPage';
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
+import AuthPage, { AUTH_CSS } from './components/AuthPage';
+import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
 import { SITE_CONTENT as c } from './constants/content';
 
-type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail';
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [prevPage, setPrevPage] = useState<Page>('experiences');
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     window.history.replaceState({ page: 'home' }, '');
@@ -28,8 +31,8 @@ export default function App() {
       if (!s?.page) { setPage('home'); return; }
       if (s.activityId) setSelectedActivityId(s.activityId);
       if (s.productId) setSelectedProductId(s.productId);
-      if (s.prevPage) setPrevPage(s.prevPage);
-      setPage(s.page);
+      if (s.prevPage) setPrevPage(s.prevPage as Page);
+      setPage(s.page as Page);
     };
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
@@ -60,9 +63,22 @@ export default function App() {
       <style>{ACTIVITY_DETAIL_CSS}</style>
       <style>{PRODUCT_DETAIL_CSS}</style>
       <style>{PRODUCTS_CSS}</style>
-      <Navbar links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'} />
+      <style>{AUTH_CSS}</style>
+      <style>{USER_DASHBOARD_CSS}</style>
+      <Navbar
+        links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
+        currentUser={currentUser}
+        onLogout={() => { setCurrentUser(null); navigate('home'); }}
+      />
 
-      {page === 'product-detail' ? (
+      {page === 'profile' ? (
+        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)} />
+      ) : page === 'login' ? (
+        <AuthPage
+          onBack={() => navigate('home')}
+          onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
+        />
+      ) : page === 'product-detail' ? (
         <ProductDetailPage productId={selectedProductId} onBack={() => setPage(prevPage)} onSelectProduct={(id) => openProduct(id, prevPage)} />
       ) : page === 'activity-detail' ? (
         <ActivityDetailPage activityId={selectedActivityId} onBack={() => setPage('experiences')} />
@@ -166,14 +182,64 @@ address{font-style:normal}
 .navbar__link:hover { color: var(--white); opacity:.75; }
 .navbar__link--active { text-decoration: underline; text-underline-offset: 4px; }
 
-.navbar__right { display:flex; align-items:center; gap:1rem; margin-left:auto; }
+.navbar__right { display:flex; align-items:center; gap:.75rem; margin-left:auto; }
 .navbar__lang {
   background:none; border:none; cursor:pointer;
   color:rgba(255,255,255,.9); display:flex; align-items:center;
   transition:color var(--ease);
 }
+.navbar__icon-btn {
+  background:none; border:none; cursor:pointer;
+  color:rgba(255,255,255,.9); display:flex; align-items:center;
+  transition:color var(--ease); padding:0;
+}
+.navbar--scrolled .navbar__icon-btn { color: var(--forest); }
+.navbar__icon-btn:hover { opacity:.75; }
 .navbar__divider { width:1px; height:28px; background:rgba(255,255,255,.35); }
 .navbar--scrolled .navbar__divider { background: rgba(0,0,0,.15); }
+/* User avatar + name */
+.navbar__user-btn {
+  background:none; border:none; cursor:pointer;
+  display:flex; align-items:center; gap:.5rem; padding:0;
+}
+.navbar__avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:#a0b8a8; color:var(--white);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.85rem; font-weight:700; flex-shrink:0;
+}
+.navbar__username {
+  font-size:.9rem; font-weight:600;
+  color:rgba(255,255,255,.95); white-space:nowrap;
+}
+.navbar--scrolled .navbar__username { color: var(--forest); }
+/* Logout modal */
+.navbar-logout-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  z-index:9999; display:flex; align-items:center; justify-content:center;
+}
+.navbar-logout-modal {
+  background:var(--white); border-radius:24px;
+  padding:3rem 2.5rem 2.5rem; max-width:560px; width:90%;
+  position:relative; text-align:center;
+  box-shadow:0 8px 40px rgba(0,0,0,.15);
+}
+.navbar-logout-modal__x {
+  position:absolute; top:1rem; right:1.2rem;
+  background:none; border:none; font-size:1.8rem; cursor:pointer; color:#111; line-height:1; font-weight:400;
+}
+.navbar-logout-modal__title { font-size:2.6rem; font-weight:700; color:#607a68; margin-bottom:1.2rem; text-align:center; }
+.navbar-logout-modal__body { font-size:.88rem; color:#666; margin-bottom:2.2rem; text-align:center; line-height:1.7; }
+.navbar-logout-modal__btns { display:flex; gap:.8rem; }
+.navbar-logout-modal__btn {
+  flex:1; padding:1.1rem 1.5rem; border-radius:50px;
+  font-size:1rem; font-weight:600; cursor:pointer; border:none;
+  display:flex; align-items:center; justify-content:center; gap:.55rem;
+}
+.navbar-logout-modal__btn--confirm { background:#ebebeb; color:#333; }
+.navbar-logout-modal__btn--confirm:hover { background:#ddd; }
+.navbar-logout-modal__btn--cancel { background:#fde8e8; color:#e53935; }
+.navbar-logout-modal__btn--cancel:hover { background:#fcd0d0; }
 .navbar__cta {
   padding:.45rem 1.4rem;
   background: var(--cta-bg);
@@ -401,7 +467,7 @@ address{font-style:normal}
   gap:2.5rem 3rem; align-items:start;
   margin-bottom:2.5rem;
 }
-.footer__logo-img { width:110px; height:110px; object-fit:contain; border-radius:50%; }
+.footer__logo-img { width:110px; height:auto; object-fit:contain; filter:brightness(0) invert(1); }
 .footer__brand-name { font-size:1.35rem; font-weight:700; color:var(--white); margin-bottom:.75rem; }
 .footer__brand-desc { font-size:.83rem; line-height:1.75; color:rgba(255,255,255,.75); font-family:var(--font-th); }
 .footer__col-title { font-size:1rem; font-weight:700; color:var(--white); margin-bottom:.9rem; }

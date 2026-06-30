@@ -3,6 +3,28 @@ import { Request,Response } from "express";
 import * as authService from "../services/authService";
 import * as userService from "../services/userService";
 
+export async function updateUserInfo(req: Request, res: Response) {
+    try {
+        const { userId } = req.params;
+        const { password, user_id, ...safeFields } = req.body;
+        const user = await userService.updateUser(userId, safeFields);
+        res.json({ success: true, user });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+}
+
+export async function updateUserPassword(req: Request, res: Response) {
+    try {
+        const { userId } = req.params;
+        const { currentPassword, newPassword } = req.body;
+        await userService.updatePassword(userId, currentPassword, newPassword);
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+}
+
 export async function getAllUsers(
     req: Request,
     res: Response

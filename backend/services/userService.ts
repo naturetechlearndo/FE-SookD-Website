@@ -1,7 +1,7 @@
 import { User } from "../models/User";
 import { generateNextId } from "../utils/idGenerator";
 
-import { getSheetData } from "./googleSheetService";
+import { getSheetData, clearSheetCache } from "./googleSheetService";
 import bcrypt from "bcrypt";
 
 export async function getUsers(): Promise<User[]> {
@@ -111,5 +111,38 @@ export async function createUser(
         throw new Error("ไม่สามารถสร้างผู้ใช้ได้");
     }
 
+    clearSheetCache("users");
     return newUser;
+}
+
+export async function updateUser(userId: string, updates: Partial<User>): Promise<User> {
+    const users = await getUsers();
+    const user = users.find(u => u.user_id === userId);
+    if (!user) throw new Error("ไม่พบผู้ใช้");
+
+    const updatedUser: User = { ...user, ...updates, user_id: userId };
+
+    const response = await fetch(process.env.GAS_URL!, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "updateUser", user_id: userId, data: updatedUser }),
+    });
+
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message ?? "ไม่สามารถอัพเดทข้อมูลได้");
+
+    clearSheetCache("users");
+    return updatedUser;
+}
+
+export async function updatePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const users = await getUsers();
+    const user = users.find(u => u.user_id === userId);
+    if (!user) throw new Error("ไม่พบผู้ใช้");
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) throw new Error("รหัสผ่านเดิมไม่ถูกต้อง");
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await updateUser(userId, { password: hash });
 }
