@@ -11,6 +11,32 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export const api = {
+  auth: {
+    login: (body: { email: string; password: string }) =>
+      fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
+    register: (body: object) =>
+      fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
+    updateUser: (userId: string, body: object) =>
+      fetch(`${BASE_URL}/auth/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
+    updatePassword: (userId: string, body: object) =>
+      fetch(`${BASE_URL}/auth/password/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
+  },
   activities: {
     getAll: () => get<any[]>('/activities'),
     getOne: (id: string) => get<any>(`/activities/${id}`),
