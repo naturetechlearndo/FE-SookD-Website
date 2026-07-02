@@ -15,7 +15,8 @@ export async function getReviews(): Promise<Review[]> {
         user_id: item.user_id,
         item_id: item.item_id,
         rating: Number(item.rating),
-        comment: item.comment
+        comment: item.comment,
+        review_date: item.review_date
     }));
 }
 

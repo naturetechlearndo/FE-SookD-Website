@@ -65,13 +65,6 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
               <button className="navbar__icon-btn" aria-label="Cart">
                 <img src="/img/cart icon.png" alt="Cart" width="26" height="26" style={{ objectFit: 'contain', borderRadius: 2 }} />
               </button>
-              {/* Globe */}
-              <button className="navbar__lang" aria-label="Change language">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                </svg>
-              </button>
               <div className="navbar__divider" />
               {/* Avatar + Name */}
               <button className="navbar__user-btn" onClick={() => onNavigate?.('profile')}>
@@ -89,13 +82,6 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
             </>
           ) : (
             <>
-              <button className="navbar__lang" aria-label="Change language">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                </svg>
-              </button>
-              <div className="navbar__divider" />
               <a href="#join" className="navbar__cta" onClick={e => { e.preventDefault(); onNavigate?.('login'); }}>Join Us</a>
             </>
           )}
@@ -108,7 +94,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
           <div className="navbar-logout-modal" onClick={e => e.stopPropagation()}>
             <button className="navbar-logout-modal__x" onClick={() => setShowLogout(false)}>×</button>
             <h3 className="navbar-logout-modal__title">Are you sure?</h3>
-            <p className="navbar-logout-modal__body">Do you really want to logout?</p>
+            <p className="navbar-logout-modal__body">Do you really want to delete the comment/rating? This action cannot be done.</p>
             <div className="navbar-logout-modal__btns">
               <button className="navbar-logout-modal__btn navbar-logout-modal__btn--confirm"
                 onClick={() => { setShowLogout(false); onLogout?.(); }}>

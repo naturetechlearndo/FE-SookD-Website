@@ -13,6 +13,8 @@ import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetai
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import AuthPage, { AUTH_CSS } from './components/AuthPage';
 import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
+import AuthPage, { AUTH_CSS } from './components/AuthPage';
+import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
 import { SITE_CONTENT as c } from './constants/content';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
@@ -26,6 +28,7 @@ export default function App() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [prevPage, setPrevPage] = useState<Page>('experiences');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     // ============= sessionCheck ========//
@@ -37,6 +40,8 @@ export default function App() {
       if (!s?.page) { setPage('home'); return; }
       if (s.activityId) setSelectedActivityId(s.activityId);
       if (s.productId) setSelectedProductId(s.productId);
+      if (s.prevPage) setPrevPage(s.prevPage as Page);
+      setPage(s.page as Page);
       if (s.prevPage) setPrevPage(s.prevPage as Page);
       setPage(s.page as Page);
     };
@@ -78,6 +83,14 @@ export default function App() {
         onLogout={() => { setCurrentUser(null); navigate('home'); }}
       />
 
+      {page === 'profile' ? (
+        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)} />
+      ) : page === 'login' ? (
+        <AuthPage
+          onBack={() => navigate('home')}
+          onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
+        />
+      ) : page === 'product-detail' ? (
       {page === 'profile' ? (
         <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)} />
       ) : page === 'login' ? (
@@ -203,6 +216,13 @@ address{font-style:normal}
 }
 .navbar--scrolled .navbar__icon-btn { color: var(--forest); }
 .navbar__icon-btn:hover { opacity:.75; }
+.navbar__icon-btn {
+  background:none; border:none; cursor:pointer;
+  color:rgba(255,255,255,.9); display:flex; align-items:center;
+  transition:color var(--ease); padding:0;
+}
+.navbar--scrolled .navbar__icon-btn { color: var(--forest); }
+.navbar__icon-btn:hover { opacity:.75; }
 .navbar__divider { width:1px; height:28px; background:rgba(255,255,255,.35); }
 .navbar--scrolled .navbar__divider { background: rgba(0,0,0,.15); }
 /* User avatar + name */
@@ -236,7 +256,7 @@ address{font-style:normal}
   position:absolute; top:1rem; right:1.2rem;
   background:none; border:none; font-size:1.8rem; cursor:pointer; color:#111; line-height:1; font-weight:400;
 }
-.navbar-logout-modal__title { font-size:2.6rem; font-weight:700; color:#607a68; margin-bottom:1.2rem; text-align:center; }
+.navbar-logout-modal__title { font-size:1.9rem; font-weight:400; color:#607a68; margin-bottom:1.2rem; text-align:center; }
 .navbar-logout-modal__body { font-size:.88rem; color:#666; margin-bottom:2.2rem; text-align:center; line-height:1.7; }
 .navbar-logout-modal__btns { display:flex; gap:.8rem; }
 .navbar-logout-modal__btn {

@@ -10,7 +10,10 @@ interface Props {
 
 function driveThumb(url: string, size = 'w800'): string {
   const m = url?.match(/\/d\/([^/]+)\//);
-  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+  if (m) {
+    const driveUrl = encodeURIComponent(`https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`);
+    return `https://res.cloudinary.com/zgor0mh6/image/fetch/q_auto,f_auto/${driveUrl}`;
+  }
   return url || '';
 }
 

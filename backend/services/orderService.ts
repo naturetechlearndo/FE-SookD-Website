@@ -9,11 +9,11 @@ export async function getOrders()
     return data.map((item: any) => ({
         order_id: item.order_id,
         user_id: item.user_id,
-        date: Date(item.order_date),
+        order_date: item.order_date,
         item_id: item.item_id,
         quantity: item.quantity,
         total_price: item.total_price,
-        status: item.order_status,
+        order_status: item.order_status,
         shipping_address: item.shipping_address,
         applied_promotion_id: item.applied_promotion_id
     }));

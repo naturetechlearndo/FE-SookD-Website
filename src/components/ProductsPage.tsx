@@ -5,7 +5,10 @@ import { api } from '../services/api';
 
 function driveThumb(url: string): string {
   const m = url?.match(/\/d\/([^/]+)\//);
-  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`;
+  if (m) {
+    const driveUrl = encodeURIComponent(`https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`);
+    return `https://res.cloudinary.com/zgor0mh6/image/fetch/w_400,q_auto,f_auto/${driveUrl}`;
+  }
   return url || '';
 }
 

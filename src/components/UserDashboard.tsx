@@ -12,10 +12,16 @@ interface Props {
 }
 
 /* ── helpers ──────────────────────────────── */
-function driveImg(id: string) {
-  if (!id) return '';
-  if (id.startsWith('http')) return id;
-  return `https://drive.google.com/thumbnail?id=${id}&sz=w200`;
+function driveImg(src: string) {
+  if (!src) return '';
+  const m = src.match(/\/d\/([^/]+)\//);
+  if (m) {
+    const driveUrl = encodeURIComponent(`https://drive.google.com/thumbnail?id=${m[1]}&sz=w200`);
+    return `https://res.cloudinary.com/zgor0mh6/image/fetch/w_200,q_auto,f_auto/${driveUrl}`;
+  }
+  if (src.startsWith('http')) return src;
+  const driveUrl = encodeURIComponent(`https://drive.google.com/thumbnail?id=${src}&sz=w200`);
+  return `https://res.cloudinary.com/zgor0mh6/image/fetch/w_200,q_auto,f_auto/${driveUrl}`;
 }
 
 function fmtDate(d: string | Date) {
@@ -91,12 +97,6 @@ const NAV_ITEMS = [
   { key: 'reviews' as DashTab, label: 'To Reviews', icon: <IconStar /> },
 ];
 
-const SOCIAL_IMPACT = [
-  { val: '12%', label: 'ลดการปล่อยก๊าซเรือนกระจก' },
-  { val: '320', label: 'ต้นไม้ที่ฟื้นฟู (ต้น)' },
-  { val: '2', label: 'ลดขยะอินทรีย์ (ตัน)' },
-  { val: '10K', label: 'สร้างรายได้ให้ชุมชน (บาท)' },
-];
 
 /* ── main component ───────────────────────── */
 export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props) {
@@ -147,8 +147,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
     }
   }, [tab, user?.user_id]);
 
-  const getProduct = (id: string) => products.find(p => p.product_id === id);
-  const getActivity = (id: string) => activities.find(a => a.activity_id === id);
+  const getProduct = (id: string) => products.find(p => p.id === id);
+  const getActivity = (id: string) => activities.find(a => a.id === id);
   const productOrders = orders.filter(o => !!getProduct(o.item_id));
   const activityOrders = orders.filter(o => !!getActivity(o.item_id));
 
@@ -361,18 +361,6 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
 
               </div>{/* end ud-profile-col */}
 
-              <hr className="ud-divider" />
-
-              {/* Social Impact — full width */}
-              <h3 className="ud-impact-title">Social Impact</h3>
-              <div className="ud-impact-grid">
-                {SOCIAL_IMPACT.map(({ val, label }) => (
-                  <div key={val} className="ud-impact-card">
-                    <div className="ud-impact-val">{val}</div>
-                    <div className="ud-impact-label">{label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
@@ -387,10 +375,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                   const p = getProduct(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
-                      <img className="ud-card__img" src={driveImg(p?.product_image)} alt={p?.product_name}
+                      <img className="ud-card__img" src={driveImg(p?.image)} alt={p?.name}
                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div className="ud-card__body">
-                        <h3 className="ud-card__name">{p?.product_name ?? o.item_id}</h3>
+                        <h3 className="ud-card__name">{p?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
                           <span><strong>DATE</strong><br />{fmtDate(o.order_date)}</span>
                           <span><strong>STATUS</strong><br /><StatusBadge s={o.order_status} /></span>
@@ -419,13 +407,14 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                   const a = getActivity(o.item_id);
                   return (
                     <div key={o.order_id} className="ud-card">
-                      <img className="ud-card__img" src={driveImg(a?.activity_image)} alt={a?.activity_name}
+                      <img className="ud-card__img" src={driveImg(a?.image)} alt={a?.name}
                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div className="ud-card__body">
-                        <h3 className="ud-card__name">{a?.activity_name ?? o.item_id}</h3>
+                        <h3 className="ud-card__name">{a?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
                           <span><strong>DATE</strong><br />{fmtDate(o.order_date)}</span>
-                          {a?.activity_location && <span><strong>Location</strong><br />{a.activity_location}</span>}
+                          {a?.date && <span><strong>Time</strong><br />{a.date}</span>}
+                          {a?.location && <span><strong>Location</strong><br />{a.location}</span>}
                           <span><strong>TOTAL</strong><br />{o.total_price} Baht</span>
                         </div>
                       </div>
@@ -450,10 +439,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                 : (
                   <div className="ud-review-grid">
                     {reviews.map(r => {
-                      const isProduct = r.item_type === 'product';
+                      const isProduct = String(r.item_id).startsWith('PRD');
                       const item = isProduct ? getProduct(r.item_id) : getActivity(r.item_id);
-                      const imgId = isProduct ? item?.product_image : item?.activity_image;
-                      const name = isProduct ? item?.product_name : item?.activity_name;
+                      const imgId = item?.image;
+                      const name = item?.name;
                       const isEditing = editId === r.review_id;
                       return (
                         <div key={r.review_id} className="ud-review-card">
@@ -463,13 +452,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate }: Props)
                             <div className="ud-review-card__info">
                               <h4 className="ud-review-card__name">{name ?? r.item_id}</h4>
                               {isProduct
-                                ? <p className="ud-review-card__meta"><strong>Total</strong> : {getProduct(r.item_id)?.product_price ?? '-'} Baht</p>
+                                ? <p className="ud-review-card__meta"><strong>Total</strong> : {item?.price ?? '-'} Baht</p>
                                 : <>
-                                    {getActivity(r.item_id)?.activity_date && (
-                                      <p className="ud-review-card__meta"><strong>Date</strong> : {fmtDate(getActivity(r.item_id)?.activity_date)}</p>
+                                    {r.review_date && (
+                                      <p className="ud-review-card__meta"><strong>Date</strong> : {fmtDate(r.review_date)}</p>
                                     )}
-                                    {getActivity(r.item_id)?.activity_location && (
-                                      <p className="ud-review-card__meta"><strong>Location</strong> : {getActivity(r.item_id)?.activity_location}</p>
+                                    {item?.location && (
+                                      <p className="ud-review-card__meta"><strong>Location</strong> : {item.location}</p>
                                     )}
                                   </>
                               }
