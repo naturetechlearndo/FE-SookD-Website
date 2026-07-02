@@ -13,9 +13,13 @@ import ProductDetailPage, { PRODUCT_DETAIL_CSS } from './components/ProductDetai
 import ProductsPage, { PRODUCTS_CSS } from './components/ProductsPage';
 import AuthPage, { AUTH_CSS } from './components/AuthPage';
 import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
+import AboutPage, { ABOUT_CSS } from './components/AboutPage';
 import { SITE_CONTENT as c } from './constants/content';
 
-type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile';
+import ChatWidget from "./components/ChatWidget/ChatWidget";
+import { getSessionId } from './utils/session';
+
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
@@ -26,12 +30,17 @@ export default function App() {
   const [orderData, setOrderData] = useState<any>(null);
 
   useEffect(() => {
+    // ============= sessionCheck ========//
+    getSessionId();
+    // ================================= //
     window.history.replaceState({ page: 'home' }, '');
     const handlePop = (e: PopStateEvent) => {
       const s = e.state;
       if (!s?.page) { setPage('home'); return; }
       if (s.activityId) setSelectedActivityId(s.activityId);
       if (s.productId) setSelectedProductId(s.productId);
+      if (s.prevPage) setPrevPage(s.prevPage as Page);
+      setPage(s.page as Page);
       if (s.prevPage) setPrevPage(s.prevPage as Page);
       setPage(s.page as Page);
     };
@@ -81,6 +90,8 @@ export default function App() {
       <style>{PRODUCTS_CSS}</style>
       <style>{AUTH_CSS}</style>
       <style>{USER_DASHBOARD_CSS}</style>
+      <style>{ABOUT_CSS}</style>
+      <ChatWidget />
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
         currentUser={currentUser}
@@ -103,6 +114,8 @@ export default function App() {
         <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} />
       ) : page === 'experiences' ? (
         <ExperiencesPage onSelectActivity={openActivity} />
+      ) : page === 'about' ? (
+        <AboutPage />
       ) : (
         <main>
           <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
@@ -130,6 +143,7 @@ export default function App() {
           />
           <div className="section-gap" />
           <Footer data={c.footer} />
+
         </main>
       )}
     </>
@@ -205,6 +219,13 @@ address{font-style:normal}
   color:rgba(255,255,255,.9); display:flex; align-items:center;
   transition:color var(--ease);
 }
+.navbar__icon-btn {
+  background:none; border:none; cursor:pointer;
+  color:rgba(255,255,255,.9); display:flex; align-items:center;
+  transition:color var(--ease); padding:0;
+}
+.navbar--scrolled .navbar__icon-btn { color: var(--forest); }
+.navbar__icon-btn:hover { opacity:.75; }
 .navbar__icon-btn {
   background:none; border:none; cursor:pointer;
   color:rgba(255,255,255,.9); display:flex; align-items:center;
