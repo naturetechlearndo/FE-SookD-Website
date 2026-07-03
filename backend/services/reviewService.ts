@@ -12,6 +12,7 @@ export async function getReviews(): Promise<Review[]> {
 
     return data.map((item: any): Review => ({
         review_id: item.review_id,
+        username:item.user_name,
         user_id: item.user_id,
         item_id: item.item_id,
         rating: Number(item.rating),
@@ -102,6 +103,7 @@ export async function updateReview(
 
     if (!result.success) {
         throw new Error("Update failed");
+        console.log(result);
     }
 
     return result.review;

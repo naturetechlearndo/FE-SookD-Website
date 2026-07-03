@@ -167,6 +167,7 @@ export async function updateReview(
         res.status(200).json(review);
 
     } catch (error) {
+        console.log("error",error);
         res.status(500).json({
             message: "Failed to update review"
         });

@@ -82,8 +82,8 @@ export function updateQuestionCount(sessionId) {
 
     const now = Date.now();
 
-    // ถ้าห่างเกิน 10 นาที รีเซ็ต
-    if (now - session.lastActive > 10 * 60 * 1000) {
+    // ถ้าห่างเกิน 1 นาที รีเซ็ต
+    if (now - session.lastActive > 1 * 60 * 1000) {
         session.questionCount = 0;
     }
 

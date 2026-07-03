@@ -15,6 +15,9 @@ export async function getUsers(): Promise<User[]> {
 
         user_type:
             item.user_type,
+        
+        user_name:
+            item.user_name,
 
         first_name:
             item.first_name,
@@ -112,6 +115,7 @@ export async function createUser(
     }
 
     clearSheetCache("users");
+    console.log("newUser =", newUser);
     return newUser;
 }
 

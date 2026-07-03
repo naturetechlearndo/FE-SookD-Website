@@ -241,7 +241,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                           </svg>
                         </div>
                         <div>
-                          <div className="pdet__reviewer-name">{r.user_id ?? 'ผู้ใช้'}</div>
+                          <div className="pdet__reviewer-name">{r.username ?? 'ผู้ใช้'}</div>
                           <Stars rating={Number(r.rating)} size={13}
                             emptyFill={isDark ? 'rgba(255,255,255,0.5)' : '#d0d0d0'} />
                         </div>

@@ -47,9 +47,9 @@ function fmtDate(d: string | Date | number) {
 
 const STATUS_MAP: Record<string, [string, string]> = {
   completed: ['Completed', '#2d6a4f'],
-  paid:      ['Paid',      '#1a6b8a'],
-  shipped:   ['Shipped',   '#5a3e8a'],
-  pending:   ['Pending',   '#b07d0a'],
+  paid: ['Paid', '#1a6b8a'],
+  shipped: ['Shipped', '#5a3e8a'],
+  pending: ['Pending', '#b07d0a'],
   cancelled: ['Cancelled', '#b03a2e'],
 };
 
@@ -68,7 +68,7 @@ function Stars({ n, max = 5, onClick }: { n: number; max?: number; onClick?: (i:
           style={{ cursor: onClick ? 'pointer' : 'default' }}
           onClick={() => onClick?.(i + 1)}
         >
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ))}
     </div>
@@ -78,29 +78,29 @@ function Stars({ n, max = 5, onClick }: { n: number; max?: number; onClick?: (i:
 /* ── icons ────────────────────────────────── */
 const IconProfile = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
   </svg>
 );
 const IconBag = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
-    <path d="M16 10a4 4 0 0 1-8 0"/>
+    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" />
+    <path d="M16 10a4 4 0 0 1-8 0" />
   </svg>
 );
 const IconWave = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
   </svg>
 );
 const IconStar = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 );
 const IconEdit = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '0.35rem' }}>
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
@@ -148,8 +148,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
 
   /* reference data */
   useEffect(() => {
-    api.products.getAll().then(setProducts).catch(() => {});
-    api.activities.getAll().then(setActivities).catch(() => {});
+    api.products.getAll().then(setProducts).catch(() => { });
+    api.activities.getAll().then(setActivities).catch(() => { });
   }, []);
 
   /* tab data */
@@ -173,13 +173,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   /* ── handlers ── */
   async function doDelete() {
     if (!deleteId) return;
-    try { await api.reviews.delete(deleteId); } catch {}
+    try { await api.reviews.delete(deleteId); } catch { }
     setReviews(rs => rs.filter(r => r.review_id !== deleteId));
     setDeleteId(null);
   }
 
   async function doSave(reviewId: string) {
-    try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch {}
+    try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch { }
     setReviews(rs => rs.map(r => r.review_id === reviewId ? { ...r, rating: editRating, comment: editText } : r));
     setEditId(null);
   }
@@ -279,8 +279,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     <div className="ud-avatar-lg">{displayName?.[0]?.toUpperCase() ?? ''}</div>
                     <button className="ud-avatar-edit" aria-label="Edit avatar">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
                   </div>
@@ -292,6 +292,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   <tbody>
                     {user?.user_type === 'individual' ? (
                       <>
+                        <tr>
+                          <td className="ud-info-key">Username</td>
+                          <td className="ud-info-sep">:</td>
+                          <td className="ud-info-val">{user.user_name}</td>
+                        </tr>
                         <tr>
                           <td className="ud-info-key">Name</td>
                           <td className="ud-info-sep">:</td>
@@ -370,8 +375,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     setShowEditPw(true);
                   }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '0.35rem' }}>
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                     Edit Password
                   </button>
@@ -405,7 +410,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       </div>
                       <button className="ud-detail-btn" onClick={() => onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> Detail
                       </button>
                     </div>
@@ -438,7 +443,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                       </div>
                       <button className="ud-detail-btn" onClick={() => onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> Detail
                       </button>
                     </div>
@@ -457,7 +462,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <div className="ud-review-filterbar">
                 <div className="ud-review-filter-select">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+                    <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
                   </svg>
                   <select value={reviewTypeFilter} onChange={e => setReviewTypeFilter(e.target.value as any)}
                     className="ud-review-select">
@@ -466,13 +471,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     <option value="activity">Activities</option>
                   </select>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="6 9 12 15 18 9"/>
+                    <polyline points="6 9 12 15 18 9" />
                   </svg>
                 </div>
                 <div className="ud-review-filter-date">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
                   <input type="date" className="ud-review-date-input" value={reviewDateFilter}
                     onChange={e => setReviewDateFilter(e.target.value)} placeholder="mm/dd/yyyy" />
@@ -570,11 +575,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                                 <p className="ud-review-comment">{r.comment}</p>
                                 <div className="ud-review-actions">
                                   <button className="ud-review-btn" onClick={() => { setEditId(r.review_id); setEditText(r.comment); setEditRating(Number(r.rating)); }}>
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     Edit Review
                                   </button>
                                   <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(r.review_id)}>
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
                                     Delete Review
                                   </button>
                                 </div>
@@ -703,8 +708,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
             <button className="ud-modal__x" onClick={() => setShowEditPw(false)}>×</button>
             <h3 className="ud-modal__title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '0.35rem' }}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               Edit Password
             </h3>

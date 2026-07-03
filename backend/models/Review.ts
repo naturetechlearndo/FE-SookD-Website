@@ -1,6 +1,7 @@
 export interface Review {
     review_id: string;
     user_id: string;
+    username:string ;
 
     item_id: string;
     item_type?: "product" | "activity";

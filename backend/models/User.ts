@@ -8,6 +8,8 @@ export interface User {
 
     user_type: UserType;
 
+    username: string;
+
     first_name: string;
 
     last_name: string;
