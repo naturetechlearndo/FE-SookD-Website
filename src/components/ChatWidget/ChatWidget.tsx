@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import "./ChatWidget.css";
 import { getSessionId } from "../../utils/session";
 
@@ -11,8 +10,6 @@ export default function ChatWidget() {
         text: string;
         link?: string;
     };
-    const location = useLocation();
-    const isDiscover = location.pathname === "/discover";
     const [heroVisible, setHeroVisible] = useState(false);
     useEffect(() => {
         const hero = document.querySelector(".hero");
@@ -37,6 +34,31 @@ export default function ChatWidget() {
 
     }, []);
 
+    const language = "en";
+    const TEXT = {
+        th: {
+            greeting: "สวัสดีจ้า มีอะไรให้ลุงช่วยไหมจ๊ะ 😊",
+            busy: "ลุงยุ่งนิดหน่อย ลองถามใหม่อีกทีนะหลานๆ",
+            name: "ลุงพาเที่ยว",
+            contact: "ติดต่อทีมงาน",
+            product: "ไปยังหน้าสินค้า",
+            placeholder: "พิมพ์ข้อความ...",
+            send: "ส่ง",
+            takingYou: "ลุงกำลังพาไปนะ..."
+        },
+        en: {
+            greeting: "Hi there! What can Uncle help you with today? 😊",
+            busy: "Sorry, Uncle is a little busy right now. Please try asking again in a moment!",
+            name: "Uncle Travel Guide",
+            contact: "Contact Support",
+            product: "View Product",
+            placeholder: "Type a message...",
+            send: "Send",
+            takingYou: "Uncle is taking you there now..."
+        }
+    };
+
+
     const [isOpen, setIsOpen] = useState(false);
     const [showBubble, setShowBubble] = useState(true);
     const [bubbleLeaving, setBubbleLeaving] = useState(false);
@@ -47,6 +69,25 @@ export default function ChatWidget() {
     const [adminMinimized, setAdminMinimized] = useState(false);
     const [adminAttention, setAdminAttention] = useState(false);
     const [showBuyLoading, setShowBuyLoading] = useState(false);
+
+    type Suggestion = {
+        text: string;
+    };
+    const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+
+    useEffect(() => {
+        console.log("useEffect run");
+
+        fetch("http://localhost:3000/chat/suggestions")
+            .then(r => r.json())
+            .then(data => {
+                // console.log("suggestion", data);
+                setSuggestions(data);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }, []);
 
     function triggerAdminButton() {
         setShowAdmin(true);
@@ -82,18 +123,11 @@ export default function ChatWidget() {
 
             sender: "bot",
 
-            text:
-                "สวัสดีจ้า มีอะไรให้ลุงช่วยไหมจ๊ะ 😊"
+            text: TEXT[language].greeting
 
         }
 
     ]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({
-            behavior: "smooth"
-        });
-    };
 
 
     useEffect(() => {
@@ -120,52 +154,8 @@ export default function ChatWidget() {
     const handleContactAdmin = async () => {
 
         try {
-
-            const response = await fetch(
-                "http://localhost:3000/contact-admin",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token ?? ""}`
-                    },
-                    body: JSON.stringify({
-
-                        guestId: getSessionId()
-
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                console.log(response);
-
-                alert("ส่งข้อมูลไม่สำเร็จ");
-
-                return;
-
-            }
-
-            // แสดงข้อความในแชท
-            setMessages(prev => [
-
-                ...prev,
-
-                {
-                    sender: "bot",
-
-                    text:
-                        `ลุงส่งเรื่องให้ทีมงานแล้ว 😊\n\n` +
-                        `รหัสอ้างอิง : ${data.reference}\n\n` +
-                        `กรุณาส่งรหัสนี้ให้ทีมงานใน LINE`
-                }
-
-            ]);
-
             // เปิด LINE OA
-            window.open(data.line, "_blank");
+            window.open("https://page.line.me/learndo?openQrModal=true");
 
         } catch (err) {
 
@@ -177,11 +167,11 @@ export default function ChatWidget() {
 
     };
 
-    async function sendMessage() {
+    async function sendMessage(customMessage?: string) {
 
-        if (!message.trim()) return;
+        const userText = customMessage ?? message;
 
-        const userText = message;
+        if (!userText.trim()) return;
 
         // 1. add user message
         setMessages(prev => [
@@ -197,7 +187,7 @@ export default function ChatWidget() {
 
         try {
 
-            console.log(localStorage.getItem("token"));
+            // console.log(localStorage.getItem("token"));
             const res = await fetch("http://localhost:3000/chat", {
                 method: "POST",
                 headers: {
@@ -229,6 +219,7 @@ export default function ChatWidget() {
 
                 setTimeout(() => {
                     setShowBuyLoading(false);
+                    console.log("dataLink:",data.link);
                     window.open(data.link, "_blank");
                 }, 3000);
             }
@@ -239,7 +230,7 @@ export default function ChatWidget() {
                 ...prev,
                 {
                     sender: "bot",
-                    text: "ลุงยุ่งนิดหน่อย ลองถามใหม่อีกทีนะหลานๆ"
+                    text: TEXT[language].busy
                 }
             ]);
 
@@ -258,25 +249,11 @@ export default function ChatWidget() {
             ${heroVisible ? "auto-message--heroPart" : ""}
         `}
                 >
-                    สวัสดีจ้า มีอะไรให้ลุงช่วยไหมจ๊ะ 😊
+                    {TEXT[language].greeting}
                 </div>
             )}
 
             {/* Contact Admin */}
-
-            {/* {showAdmin && (
-                <a
-                    href="https://www.facebook.com/LearnDoClub/"
-                    className={`admin-btn 
-            ${adminAttention ? "attention" : ""} 
-            ${adminMinimized ? "small" : ""}
-        `}
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    {adminMinimized ? "💬" : "💬 ติดต่อทีมงาน"}
-                </a>
-            )} */}
 
             {showAdmin && (
                 <button
@@ -288,7 +265,7 @@ export default function ChatWidget() {
                     onClick={handleContactAdmin}
                 >
 
-                    {adminMinimized ? "💬" : "💬 ติดต่อทีมงาน"}
+                    {adminMinimized ? "💬" : `💬 ${TEXT[language].contact}`}
                 </button>
             )}
 
@@ -328,7 +305,7 @@ export default function ChatWidget() {
 
                     <span>
 
-                        ลุงพาเที่ยว
+                        {TEXT[language].name}
 
                     </span>
 
@@ -343,26 +320,6 @@ export default function ChatWidget() {
 
                 <div className="messages">
 
-                    {/* {messages.map((msg, index) => (
-
-                        <div
-
-                            key={index}
-
-                            className={
-                                msg.sender === "user"
-                                    ? "user-message"
-                                    : "bot-message"
-                            }
-
-                        >
-
-                            {msg.text}
-
-                        </div>
-
-
-                    ))} */}
                     {messages.map((msg, index) => (
                         <div
                             key={index}
@@ -375,14 +332,16 @@ export default function ChatWidget() {
                             <div>{msg.text}</div>
 
                             {msg.link && (
+                                <div className="suggestion-chip">
                                 <a
                                     href={msg.link}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="buy-link"
                                 >
-                                    🛒 ไปยังหน้าสินค้า
+                                    🛒 {TEXT[language].product}
                                 </a>
+                                </div>
                             )}
                         </div>
                     ))}
@@ -401,6 +360,23 @@ export default function ChatWidget() {
                     <div ref={messagesEndRef} />
 
                 </div>
+                {/* =============================== */}
+                {/* {messages.length === 0 && ( */}
+                <div className="chat-suggestions">
+                    {suggestions.map((item) => (
+                        <button
+                            key={item.text}
+                            className="suggestion-chip"
+                            onClick={() => sendMessage(item.text)}
+                        >
+                            {item.text}
+                        </button>
+                    ))}
+                </div>
+                {/* )} */}
+
+                <div className="chat-input"></div>
+                {/* =============================== */}
 
                 <div className="chat-input">
 
@@ -408,7 +384,7 @@ export default function ChatWidget() {
 
                         value={message}
 
-                        placeholder="พิมพ์ข้อความ..."
+                        placeholder={TEXT[language].placeholder}
 
                         onChange={(e) =>
                             setMessage(e.target.value)
@@ -429,8 +405,7 @@ export default function ChatWidget() {
                     <button className="send"
                         onClick={sendMessage}
                     >
-
-                        ส่ง
+                        {TEXT[language].send}
 
                     </button>
                 </div>
@@ -442,7 +417,7 @@ export default function ChatWidget() {
                 <div className="buy-overlay">
                     <div className="buy-box">
                         <div className="spinner"></div>
-                        <div>ลุงกำลังพาหลานไปนะ...</div>
+                        <div>{TEXT[language].takingYou}</div>
                     </div>
                 </div>
             )}

@@ -214,6 +214,7 @@
 
     margin-bottom: 10px;
     max-width: 80%;
+    overflow-wrap: break-word;
 }
 
 .user-message {
@@ -466,4 +467,59 @@
     transform: scale(1.05);
     transition: 0.3s;
     background: #40916c;
+}
+
+/* =========== Suggestion ============ */
+.chat-suggestions{
+    display: flex;
+    gap: 10px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    white-space: nowrap;
+
+    background: rgba(0, 0, 0, 0.08);
+
+
+    padding: 4px;
+
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE */
+}
+
+.chat-suggestions::-webkit-scrollbar{
+    display: none;              /* Chrome/Safari */
+}
+
+.suggestion-chip{
+    font: inherit;
+
+    padding:8px 14px;
+
+    border:none;
+
+    border-radius:20px;
+
+    background:#edf8f3;
+
+    color:#165348;
+
+    font-size:14px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+
+    /* z-index: 99999; */
+
+}
+
+.suggestion-chip:hover{
+
+    background:#d8f0e4;
+
+    transform:translateY(-2px);
+
 }

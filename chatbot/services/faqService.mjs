@@ -7,21 +7,37 @@ let lastUpdate = 0;
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
 
+const language ="en";
+
 // ================= Get FAQ =================
 
-export async function getFAQ() {
+export async function getFAQ(language = "th") {
 
     const data = await getSheetData("faqs");
     // console.log("FAQ RAW:", data);
 
-    return data.map(item => ({
+     return data
+        .filter(item => 
+            item.language === language
+        )
+        .map(item => ({
+            question: item.question,
+            answer: item.answer,
+            show_suggestion: item.show_suggestion
+        }));
 
-        question: item.question,
+}
 
-        answer: item.answer
+//==============suggestion=====================
+export async function getSuggestions() {
 
-    }));
+    const faqs = await getFAQ(language);
 
+    return faqs
+        .filter(faq => faq.show_suggestion === "TRUE" || faq.show_suggestion === true)
+        .map(faq => ({
+            text: faq.question
+        }));
 }
 
 // ================= Create FAQ Fuse =================
@@ -38,7 +54,7 @@ export async function createFAQFuse() {
 
     // console.log("โหลด FAQ จาก Google Sheet");
 
-    const faqData = await getFAQ();
+    const faqData = await getFAQ(language);
 
     const formattedFAQ = faqData.map(faq => ({
         ...faq,
@@ -82,9 +98,7 @@ export function searchFAQ(
         fuse.search(question);
 
 
-    if (
-        result.length === 0
-    ) {
+    if (result.length === 0) {
 
         return null;
 

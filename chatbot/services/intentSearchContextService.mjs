@@ -1,36 +1,50 @@
 import Fuse from "fuse.js";
+// const language = req.body.language || "th";
 
 //====================Intent type of question==============================//
-export function getIntent(question) {
+export function getIntent(
+    question,
+    language = "th"
+) {
 
-    if (
-        /ของฝาก|สินค้า|กิน|ดื่ม|อาหาร/
-            .test(question)
-    ) {
+    const q = question.toLowerCase();
+
+    if (language === "en") {
+
+        if (/souvenir|product|food|drink|organic/.test(q))
+            return "product";
+
+        if (/activity|workshop|camp|experience|things to do/.test(q))
+            return "activity";
+
+        if (/travel|place|community|where|nature|destination/.test(q))
+            return "place";
+
+        if (/recommend|suggest|interesting/.test(q))
+            return "recommend";
+
+        if (/buy|purchase|order|link|cart/.test(q))
+            return "buy";
+
+        if (/price|cost|fee/.test(q))
+            return "price";
+
+        return "chat";
+    }
+
+    // -------- TH --------
+
+    if (/ของฝาก|สินค้า|กิน|ดื่ม|อาหาร/.test(question))
         return "product";
-    }
 
-    if (
-        /กิจกรรม|เวิร์กช็อป|workshop|ทำอะไร/
-            .test(question)
-    ) {
+    if (/กิจกรรม|เวิร์กช็อป|workshop|ทำอะไร/.test(question))
         return "activity";
-    }
 
-
-    if (
-        /เที่ยว|สถานที่|ชุมชน|ไปไหนดี|ธรรมชาติ/
-            .test(question)
-    ) {
+    if (/เที่ยว|สถานที่|ชุมชน|ไปไหนดี|ธรรมชาติ/.test(question))
         return "place";
-    }
 
-    if (
-        /แนะนำ|มีอะไรบ้าง|น่าสนใจ/
-            .test(question)
-    ) {
+    if (/แนะนำ|มีอะไรบ้าง|น่าสนใจ/.test(question))
         return "recommend";
-    }
 
     if (/ซื้อ|ลิงก์|ลิ้งก์|link|สั่งซื้อ|สั่ง|กดตะกร้า|เอาสินค้านี้|ไปเลย|เอาอันนี้|จัด|เอา/.test(question))
         return "buy";
@@ -84,7 +98,10 @@ export function createFuse(searchData) {
 }
 
 //==============EDIT CONTEXT===============//
-export function buildContext(result) {
+export function buildContext(
+    result,
+    language = "th"
+) {
 
     return result
         .slice(0, 3)
@@ -97,17 +114,42 @@ export function buildContext(result) {
 
                 case "product":
 
+                    if (language === "en") {
+
+                        return `
+Product: ${data.name ?? "-"}
+Category: ${data.type ?? "-"}
+Description: ${data.detail ?? "-"}
+Highlight: ${data.highlight ?? "-"}
+Suitable for: ${data.target ?? "-"}
+Price: ${data.price ?? "-"}`;
+// Link: ${data.link ?? "-"}`;
+
+                    }
+
                     return `
 สินค้า: ${data.name ?? "-"}
 ประเภท: ${data.type ?? "-"}
 ข้อมูล: ${data.detail ?? "-"}
 จุดเด่น: ${data.highlight ?? "-"}
 เหมาะกับ: ${data.target ?? "-"}
-ราคา: ${data.price ?? "-"}
-ลิงก์: ${data.link ?? "-"}
-`;
+ราคา: ${data.price ?? "-"}`;
+// ลิงก์: ${data.link ?? "-"}`;
 
                 case "activity":
+
+                    if (language === "en") {
+
+                        return `
+Activity: ${data.name ?? "-"}
+Activity Type: ${data.type ?? "-"}
+Description: ${data.description ?? "-"}
+Location: ${data.location ?? "-"}
+Meeting Point: ${data.meetingPoint ?? "-"}
+Price: ${data.price ?? "-"}
+`;
+
+                    }
 
                     return `
 กิจกรรม: ${data.name ?? "-"}
@@ -120,16 +162,26 @@ export function buildContext(result) {
 
                 case "place":
 
+                    if (language === "en") {
+
+                        return `
+Place: ${data.name ?? "-"}
+// Origin: ${data.origin ?? "-"}`;
+// Link: ${data.link ?? "-"}`;
+
+                    }
+
                     return `
 สถานที่: ${data.name ?? "-"}
-ที่มาสถานที่: ${data.origin ?? "-"}
-ลิงก์: ${data.link ?? "-"}
-`;
+ที่มาสถานที่: ${data.origin ?? "-"}`;
+// ลิงก์: ${data.link ?? "-"}`;
 
                 default:
                     return "";
+
             }
 
         })
         .join("\n\n");
+
 }
