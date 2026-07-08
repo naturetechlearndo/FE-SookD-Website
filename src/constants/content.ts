@@ -4,7 +4,7 @@ export const SITE_CONTENT: SiteContent = {
   navLinks: [
     { label: 'Experiences', href: '#experiences', page: 'experiences' },
     { label: 'Product',     href: '#products',    page: 'products' },
-    { label: 'Discover',    href: '#discover' },
+    { label: 'Discover',    href: '#discover',   page: 'discover' },
     { label: 'Membership',  href: '#membership' },
     { label: 'About',       href: '#about',       page: 'about' },
   ],

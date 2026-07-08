@@ -17,13 +17,14 @@ import UserDashboard, { USER_DASHBOARD_CSS } from './components/UserDashboard';
 import AboutPage, { ABOUT_CSS } from './components/AboutPage';
 import CartPage, { CART_CSS } from './components/CartPage';
 import CheckoutPage, { CHECKOUT_CSS } from './components/CheckoutPage';
+import DiscoverPage, { DISCOVER_CSS } from './components/DiscoverPage';
 import { SITE_CONTENT as c } from './constants/content';
 import { getCart } from './utils/cart';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import { getSessionId } from './utils/session';
 
-type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about' | 'cart' | 'checkout';
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about' | 'cart' | 'checkout' | 'discover';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
@@ -124,6 +125,7 @@ export default function App() {
       <style>{ABOUT_CSS}</style>
       <style>{CART_CSS}</style>
       <style>{CHECKOUT_CSS}</style>
+      <style>{DISCOVER_CSS}</style>
       <ChatWidget />
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
@@ -150,6 +152,8 @@ export default function App() {
         <ProductsPage onSelectProduct={(id) => openProduct(id, 'products')} lang={lang} />
       ) : page === 'experiences' ? (
         <ExperiencesPage onSelectActivity={openActivity} currentUser={currentUser} lang={lang} />
+      ) : page === 'discover' ? (
+        <DiscoverPage lang={lang} onNavigate={navigate} />
       ) : page === 'about' ? (
         <AboutPage lang={lang} />
       ) : page === 'checkout' ? (
