@@ -26,6 +26,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [activeOrigin, setActiveOrigin] = useState('ทั้งหมด');
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,14 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
       .then(setProducts)
       .catch(() => setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบ backend'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('featuredProducts');
+    if (stored) {
+      try { setFeaturedIds(JSON.parse(stored)); setShowAll(true); } catch {}
+      sessionStorage.removeItem('featuredProducts');
+    }
   }, []);
 
   useEffect(() => {
@@ -72,7 +81,18 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
     return matchSearch && matchOrigin;
   });
 
-  const visible = showAll ? filtered : filtered.slice(0, VISIBLE_COUNT);
+  const sorted = featuredIds.length
+    ? [...filtered].sort((a, b) => {
+        const ai = featuredIds.indexOf(a.id);
+        const bi = featuredIds.indexOf(b.id);
+        if (ai >= 0 && bi < 0) return -1;
+        if (ai < 0 && bi >= 0) return 1;
+        if (ai >= 0 && bi >= 0) return ai - bi;
+        return 0;
+      })
+    : filtered;
+
+  const visible = showAll ? sorted : sorted.slice(0, VISIBLE_COUNT);
 
   return (
     <>
@@ -152,15 +172,15 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
           <>
             <div className="exp-grid">
               {visible.map(p => (
-                <ProductCard key={p.id} product={p} lang={lang} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Products', item_id: p.id, item_name: p.name }); onSelectProduct(p.id); }} />
+                <ProductCard key={p.id} product={p} lang={lang} isFeatured={featuredIds.includes(p.id)} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Products', item_id: p.id, item_name: p.name }); onSelectProduct(p.id); }} />
               ))}
             </div>
 
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <p className="exp-state">ไม่พบสินค้าที่ตรงกับการค้นหา</p>
             )}
 
-            {filtered.length > VISIBLE_COUNT && (
+            {sorted.length > VISIBLE_COUNT && (
               <div className="exp-more-wrap">
                 <button className="exp-more-btn" onClick={() => { if (!showAll) (window as any).gtag?.('event', 'click_load_more', { list_name: 'Products' }); setShowAll(!showAll); }}>
                   {showAll ? 'Show less' : 'See more'}
@@ -179,7 +199,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
   );
 }
 
-function ProductCard({ product: p, onClick, lang = 'TH' }: { product: any; onClick: () => void; lang?: 'TH' | 'ENG' }) {
+function ProductCard({ product: p, onClick, lang = 'TH', isFeatured = false }: { product: any; onClick: () => void; lang?: 'TH' | 'ENG'; isFeatured?: boolean }) {
   const tags = p.origin?.split(',').map((o: string) => o.trim()) ?? [];
   const imgSrc = driveThumb(p.image);
 
@@ -189,6 +209,11 @@ function ProductCard({ product: p, onClick, lang = 'TH' }: { product: any; onCli
       <div className="exp-card__img-wrap">
         <img src={imgSrc} alt={p.name} className="exp-card__img" loading="lazy"
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+        {isFeatured && (
+          <div style={{ position:'absolute', top:8, left:8, background:'linear-gradient(95deg,#E65100,#FF8F00)', color:'white', fontSize:'.7rem', fontWeight:700, padding:'3px 9px', borderRadius:20, boxShadow:'0 2px 8px #E6510055', zIndex:3 }}>
+            🍯 แนะนำพิเศษ
+          </div>
+        )}
         <div className="impact-badge">
           <span className="impact-badge__pct">10%</span>
           <span className="impact-badge__text">{lang === 'TH' ? <>รายได้ 10%<br/>สนับสนุนมูลนิธิ<br/>ในท้องถิ่น</> : <>10% of income<br/>supports local<br/>foundations.</>}</span>

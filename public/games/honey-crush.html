@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Honey Crush 🐝</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #FFFDF5;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+#wrap {
+  width: min(98vw, 520px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+/* ── BANNER ── */
+#banner {
+  background: linear-gradient(95deg, #C67A00, #8B5000);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: clamp(.72rem, 2.4vw, .88rem);
+  line-height: 1.55;
+  color: #FFF8E1;
+  text-align: center;
+  flex-shrink: 0;
+}
+#banner strong { color: #FFE082; }
+
+/* ── STATS ── */
+#stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+.stat { text-align: center; }
+.stat-lbl { font-size: .62rem; color: #A07040; text-transform: uppercase; letter-spacing: .1em; }
+.stat-val { font-size: 1.3rem; font-weight: 700; color: #C67A00; font-variant-numeric: tabular-nums; line-height: 1.1; }
+
+/* ── MAIN ROW: board + jar ── */
+#main-row {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* ── BOARD ── */
+#board-frame {
+  flex: 1;
+  background: linear-gradient(150deg, #C67A00, #7A4000);
+  border-radius: 14px;
+  padding: 5px;
+  box-shadow: 0 4px 20px #FF8F0030, inset 0 1px 0 #FFA00044;
+  display: flex;
+}
+#board {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  background: #1A0800;
+  border-radius: 10px;
+  padding: 5px;
+}
+.tile {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .12s ease, box-shadow .12s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+.tile img { width: 68%; height: 68%; object-fit: contain; pointer-events: none; transition: transform .12s; }
+.tile:hover { transform: scale(1.06); }
+.tile:hover img { transform: scale(1.05); }
+.tile.selected { transform: scale(1.12); box-shadow: 0 0 0 2px #fff9, 0 0 14px #fff5; z-index: 5; }
+.tile.pop   { animation: pop  .32s ease forwards; pointer-events: none; }
+.tile.land  { animation: land .24s cubic-bezier(.34,1.56,.64,1) forwards; }
+.tile.shake { animation: shake .25s ease; }
+@keyframes pop  { 0%{transform:scale(1);filter:brightness(1);opacity:1} 45%{transform:scale(1.45);filter:brightness(2.2)} 100%{transform:scale(0);opacity:0} }
+@keyframes land { from{transform:translateY(-30px) scale(.6);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+/* ── JAR PANEL ── */
+#jar-panel {
+  width: 110px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #FFF3E0;
+  border: 2px solid #FFE0B2;
+  border-radius: 14px;
+  padding: 10px 6px;
+}
+#jar-title {
+  font-size: .72rem;
+  font-weight: 700;
+  color: #6D4C41;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  text-align: center;
+}
+#jar-count-display {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #E65100;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1;
+}
+#jar-count-sub {
+  font-size: .7rem;
+  color: #A07040;
+  text-align: center;
+  margin-top: 2px;
+}
+#jar-svg {
+  width: 90px;
+  height: 116px;
+  filter: drop-shadow(0 4px 10px #FFB30050);
+  transition: filter .4s;
+}
+#jar-svg.full { filter: drop-shadow(0 0 18px #FFD54FAA); }
+#honey-fill { transition: y .45s ease, height .45s ease; }
+
+/* ── MESSAGE ── */
+#message {
+  flex-shrink: 0;
+  font-size: .84rem;
+  font-weight: 600;
+  color: #388E3C;
+  min-height: 1.4em;
+  padding: 0 4px;
+  text-align: center;
+}
+#message.warn { color: #E64A19; }
+
+/* ── FLYING ── */
+.fly {
+  position: fixed; pointer-events: none; z-index: 9999;
+  width: 28px; height: 28px; object-fit: contain;
+  transition: left .55s cubic-bezier(.4,0,.2,1), top .55s cubic-bezier(.4,0,.2,1), opacity .55s, transform .55s;
+}
+
+/* ── OVERLAY ── */
+#overlay { display:none; position:fixed; inset:0; background:#0008; z-index:200; align-items:center; justify-content:center; flex-direction:column; gap:14px; backdrop-filter:blur(4px); }
+#overlay.show { display:flex; }
+#ov-box { background:#FFF8EE; border-radius:16px; padding:2rem; text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center; box-shadow:0 8px 32px #0003; }
+#ov-title { font-size:1.8rem; font-weight:800; color:#C67A00; }
+#ov-msg { color:#5D4037; font-size:.95rem; line-height:1.7; }
+#ov-btn { background:#C67A00; color:white; border:none; border-radius:50px; padding:.7rem 2rem; font-size:1rem; font-weight:700; cursor:pointer; transition:background .15s; }
+#ov-btn:hover { background:#FF8F00; }
+#ov-shop-wrap { width:100%; display:none; }
+#ov-shop-btn { width:100%; background:linear-gradient(95deg,#E65100,#FF8F00); color:white; border:none; border-radius:12px; padding:.9rem 1.5rem; font-size:1rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px #E6510044; transition:transform .12s,box-shadow .12s; letter-spacing:.02em; }
+#ov-shop-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px #E6510066; }
+#ov-shop-intro { font-size:.82rem; color:#6D4C41; line-height:1.7; text-align:center; }
+/* ── SWAP BUTTON ── */
+#honey-swap-btn {
+  width:96px; padding:6px 4px; border-radius:10px; border:2px solid #FFB300;
+  background:#FFF8E1; color:#6D4C41; font-size:.7rem; font-weight:700;
+  cursor:pointer; line-height:1.4; transition:all .15s; text-align:center;
+}
+#honey-swap-btn:disabled { opacity:.38; cursor:not-allowed; border-color:#D7CCC8; }
+#honey-swap-btn:not(:disabled):hover { background:#FFE082; }
+#honey-swap-btn.swap-active {
+  background:linear-gradient(135deg,#FFD54F,#FF8F00);
+  color:white; border-color:#E65100;
+  animation:swappulse 1s ease-in-out infinite;
+}
+@keyframes swappulse { 0%,100%{box-shadow:0 0 0 0 #FF8F0060} 50%{box-shadow:0 0 0 6px #FF8F0000} }
+#board-frame.swap-mode { box-shadow:0 0 0 3px #FF8F00, 0 4px 20px #FF8F0060; }
+</style>
+</head>
+<body>
+
+<div id="wrap">
+  <div id="banner">
+    สลับเพลิน ลุ้นสนุก... แต่ระวังตัวแสบให้ดี!<br>
+    รวมผึ้งครบ 3 ตัวเมื่อไหร่ <strong>น้ำผึ้งหายวับไปกับตา!</strong>
+  </div>
+
+  <div id="stats">
+    <div class="stat"><div class="stat-lbl">คะแนน</div><div class="stat-val" id="score-v">0</div></div>
+    <div class="stat"><div class="stat-lbl">เทิร์น</div><div class="stat-val" id="moves-v">30</div></div>
+  </div>
+
+  <div id="main-row">
+    <!-- Board -->
+    <div id="board-frame"><div id="board"></div></div>
+
+    <!-- Jar panel -->
+    <div id="jar-panel">
+      <div id="jar-title">โถน้ำผึ้ง</div>
+      <div>
+        <div id="jar-count-display">0</div>
+        <div id="jar-count-sub">จาก 10 หยด</div>
+      </div>
+
+      <button id="honey-swap-btn" disabled onclick="activateFreeSwap()">
+        🔄 สลับอิสระ<br><span style="font-size:.65rem;opacity:.8">ใช้ 1 น้ำผึ้ง</span>
+      </button>
+
+      <svg id="jar-svg" viewBox="0 0 90 116" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="jclip">
+            <path d="M11 38 Q10 38 10 48 L10 98 Q10 110 45 110 Q80 110 80 98 L80 48 Q80 38 79 38 Z"/>
+          </clipPath>
+          <linearGradient id="hgrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"  stop-color="#E65100"/>
+            <stop offset="40%" stop-color="#FFD54F"/>
+            <stop offset="100%" stop-color="#E65100"/>
+          </linearGradient>
+          <linearGradient id="gls" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"  stop-color="#FFF8E1" stop-opacity=".22"/>
+            <stop offset="100%" stop-color="#FFF8E1" stop-opacity=".04"/>
+          </linearGradient>
+        </defs>
+        <rect id="honey-fill" x="10" y="110" width="70" height="0" fill="url(#hgrad)" clip-path="url(#jclip)"/>
+        <ellipse id="honey-wave" cx="45" cy="110" rx="35" ry="3" fill="#FFD54F" opacity="0" clip-path="url(#jclip)"/>
+        <path d="M11 38 Q10 38 10 48 L10 98 Q10 110 45 110 Q80 110 80 98 L80 48 Q80 38 79 38 Z" fill="url(#gls)" stroke="#A85A00" stroke-width="2.5"/>
+        <rect x="16" y="46" width="5" height="34" rx="2.5" fill="white" opacity=".18"/>
+        <rect x="16" y="64" width="58" height="28" rx="4" fill="white" opacity=".08"/>
+        <text x="45" y="82" text-anchor="middle" font-size="18">🐝</text>
+        <rect x="26" y="28" width="38" height="12" rx="4" fill="#6D4C41" stroke="#A85A00" stroke-width="1.5"/>
+        <rect x="16" y="8"  width="58" height="22" rx="7" fill="#1B4D22" stroke="#388E3C" stroke-width="2"/>
+        <text x="45" y="23" text-anchor="middle" font-size="9" fill="#C8E6C9">ผึ้งชันโรง</text>
+      </svg>
+    </div>
+  </div>
+
+  <div id="message"></div>
+</div>
+
+<div id="overlay">
+  <div id="ov-box">
+    <div id="ov-title">🎉</div>
+    <div id="ov-msg"></div>
+    <div id="ov-shop-wrap">
+      <div id="ov-shop-intro"></div>
+      <button id="ov-shop-btn">🛒 ซื้อสินค้า</button>
+    </div>
+    <button id="ov-btn" onclick="startGame()">เล่นใหม่อีกครั้ง</button>
+  </div>
+</div>
+
+<script>
+const GRID  = 5;
+const MAX_H = 10;
+const MAX_M = 30;
+
+const T = [
+  { img:'../img/honey-removebg-preview.png',    bg:'#3B1800', bd:'#FF8F00' },
+  { img:'../img/soap-removebg-preview.png',     bg:'#0B2B18', bd:'#43A047' },
+  { img:'../img/yamong-removebg-preview.png',   bg:'#0B1B3B', bd:'#1E88E5' },
+  { img:'../img/propolis-removebg-preview.png', bg:'#260B3B', bd:'#8E24AA' },
+  { img:'../img/bee-removebg-preview.png',      bg:'#2C2000', bd:'#F9A825' },
+];
+const BEE = 4;
+
+let grid=[], sel=null, score=0, honey=0, moves=MAX_M, busy=false;
+let freeSwapMode=false, freeSwapSel=null;
+const $    = id => document.getElementById(id);
+const rnd  = ()  => Math.floor(Math.random() * T.length);
+const wait = ms  => new Promise(r => setTimeout(r, ms));
+
+const FEATURED=['PRD019_TH','PRD020_TH','PRD021_TH','PRD022_TH'];
+
+function startGame(){
+  score=0; honey=0; moves=MAX_M; sel=null; busy=false;
+  freeSwapMode=false; freeSwapSel=null;
+  $('overlay').classList.remove('show');
+  $('ov-shop-wrap').style.display='none';
+  $('board-frame').classList.remove('swap-mode');
+  msg('','');
+  buildGrid(); render();
+}
+
+function activateFreeSwap(){
+  if(honey<=0||busy) return;
+  freeSwapMode=!freeSwapMode;
+  freeSwapSel=null;
+  sel=null;
+  $('board-frame').classList.toggle('swap-mode', freeSwapMode);
+  $('honey-swap-btn').classList.toggle('swap-active', freeSwapMode);
+  document.querySelectorAll('.tile.selected').forEach(t=>t.classList.remove('selected'));
+  if(freeSwapMode) msg('🍯 เลือกไพ่ 2 ใบเพื่อสลับตำแหน่ง','');
+  else msg('','');
+}
+
+function doFreeSwap(r1,c1,r2,c2){
+  honey--;
+  [grid[r1][c1],grid[r2][c2]]=[grid[r2][c2],grid[r1][c1]];
+  freeSwapMode=false; freeSwapSel=null;
+  $('board-frame').classList.remove('swap-mode');
+  render();
+  msg('✨ สลับเรียบร้อย!','');
+}
+
+document.getElementById('ov-shop-btn').addEventListener('click',()=>{
+  window.parent.postMessage({action:'shop',featured:FEATURED},'*');
+});
+
+function buildGrid(){
+  grid=[];
+  for(let r=0;r<GRID;r++){
+    grid[r]=[];
+    for(let c=0;c<GRID;c++){
+      let t;
+      do{ t=rnd(); }while(
+        (c>=2&&grid[r][c-1]===t&&grid[r][c-2]===t)||
+        (r>=2&&grid[r-1][c]===t&&grid[r-2][c]===t)
+      );
+      grid[r][c]=t;
+    }
+  }
+}
+
+function render(newCells=[]){
+  const board=$('board');
+  board.innerHTML='';
+  for(let r=0;r<GRID;r++) for(let c=0;c<GRID;c++){
+    const t=grid[r][c];
+    const d=document.createElement('div');
+    d.className='tile';
+    if(t>=0){
+      d.style.background=T[t].bg;
+      d.style.borderColor=T[t].bd;
+      const im=document.createElement('img');
+      im.src=T[t].img; im.alt='';
+      d.appendChild(im);
+      if((sel&&sel[0]===r&&sel[1]===c)||(freeSwapSel&&freeSwapSel[0]===r&&freeSwapSel[1]===c)) d.classList.add('selected');
+      if(newCells.some(([nr,nc])=>nr===r&&nc===c)) d.classList.add('land');
+    }
+    d.addEventListener('click',()=>onClick(r,c));
+    board.appendChild(d);
+  }
+  ui();
+}
+
+function ui(){
+  $('score-v').textContent=score;
+  $('moves-v').textContent=moves;
+  $('jar-count-display').textContent=honey;
+  const fillH=Math.round((honey/MAX_H)*72);
+  $('honey-fill').setAttribute('y',     110-fillH);
+  $('honey-fill').setAttribute('height',fillH);
+  $('honey-wave').setAttribute('cy',    110-fillH);
+  $('honey-wave').setAttribute('opacity',honey>0?'0.75':'0');
+  $('jar-svg').classList.toggle('full', honey>=MAX_H);
+  const sb=$('honey-swap-btn');
+  sb.disabled=(honey<=0||busy);
+  sb.classList.toggle('swap-active',freeSwapMode);
+}
+
+function onClick(r,c){
+  if(busy||moves<=0) return;
+
+  if(freeSwapMode){
+    if(!freeSwapSel){ freeSwapSel=[r,c]; render(); return; }
+    const[fr,fc]=freeSwapSel;
+    if(fr===r&&fc===c){ freeSwapSel=null; render(); return; }
+    doFreeSwap(fr,fc,r,c);
+    return;
+  }
+
+  if(!sel){ sel=[r,c]; render(); return; }
+  const[sr,sc]=sel; sel=null;
+  if(sr===r&&sc===c){ render(); return; }
+  if(Math.abs(sr-r)+Math.abs(sc-c)===1) doSwap(sr,sc,r,c);
+  else{ sel=[r,c]; render(); }
+}
+
+async function doSwap(r1,c1,r2,c2){
+  busy=true;
+  [grid[r1][c1],grid[r2][c2]]=[grid[r2][c2],grid[r1][c1]];
+  render();
+  const groups=findGroups();
+  if(!groups.length){
+    await wait(200);
+    [grid[r1][c1],grid[r2][c2]]=[grid[r2][c2],grid[r1][c1]];
+    render();
+    const tiles=$('board').querySelectorAll('.tile');
+    [r1*GRID+c1,r2*GRID+c2].forEach(i=>tiles[i].classList.add('shake'));
+    busy=false; return;
+  }
+  moves--;
+  await processGroups(groups);
+  busy=false;
+  if(honey>=MAX_H){ honeyWin(); return; }
+  if(moves<=0) endGame();
+}
+
+function findGroups(){
+  const groups=[],used=new Set();
+  const add=(cells,type)=>{
+    const k=cells.map(([r,c])=>`${r},${c}`).sort().join('|');
+    if(!used.has(k)){used.add(k);groups.push({type,cells});}
+  };
+  for(let r=0;r<GRID;r++) for(let c=0;c<=GRID-3;c++){
+    const t=grid[r][c]; if(t<0) continue;
+    if(grid[r][c+1]===t&&grid[r][c+2]===t){
+      const cells=[[r,c],[r,c+1],[r,c+2]];
+      let l=3; while(c+l<GRID&&grid[r][c+l]===t){cells.push([r,c+l]);l++;}
+      add(cells,t);
+    }
+  }
+  for(let c=0;c<GRID;c++) for(let r=0;r<=GRID-3;r++){
+    const t=grid[r][c]; if(t<0) continue;
+    if(grid[r+1][c]===t&&grid[r+2][c]===t){
+      const cells=[[r,c],[r+1,c],[r+2,c]];
+      let l=3; while(r+l<GRID&&grid[r+l][c]===t){cells.push([r+l,c]);l++;}
+      add(cells,t);
+    }
+  }
+  return groups;
+}
+
+async function processGroups(groups){
+  const tiles=$('board').querySelectorAll('.tile');
+  const bee=groups.filter(g=>g.type===BEE);
+  const other=groups.filter(g=>g.type!==BEE);
+  const cellSet=new Set(),allCells=[];
+  groups.forEach(g=>g.cells.forEach(([r,c])=>{
+    const k=`${r},${c}`;
+    if(!cellSet.has(k)){cellSet.add(k);allCells.push([r,c]);}
+  }));
+  allCells.forEach(([r,c])=>tiles[r*GRID+c].classList.add('pop'));
+
+  const jr=$('jar-svg').getBoundingClientRect();
+  const jx=jr.left+jr.width/2, jy=jr.top+jr.height/2;
+
+  other.forEach(g=>{
+    const mid=g.cells[Math.floor(g.cells.length/2)];
+    const tr=tiles[mid[0]*GRID+mid[1]].getBoundingClientRect();
+    flyImg(T[g.type].img,tr.left+tr.width/2,tr.top+tr.height/2,jx,jy,false);
+  });
+
+  await wait(140);
+  if(other.length){ honey=Math.min(MAX_H,honey+other.length); msg(`+${other.length} หยดน้ำผึ้ง 🍯`,''); }
+
+  if(bee.length){
+    for(const g of bee){
+      const tr=tiles[g.cells[0][0]*GRID+g.cells[0][1]].getBoundingClientRect();
+      flyImg(T[BEE].img,tr.left+tr.width/2,tr.top+tr.height/2,jx,jy,true);
+    }
+    await wait(780);
+    const stolen=bee.length;
+    honey=Math.max(0,honey-stolen);
+    msg(`🐝 ผึ้งขโมยน้ำผึ้ง ${stolen} หยด!`,'warn');
+  }
+
+  score+=allCells.length*10+bee.length*30;
+  allCells.forEach(([r,c])=>{grid[r][c]=-1;});
+  await wait(230);
+
+  const newCells=[];
+  for(let c=0;c<GRID;c++){
+    let bot=GRID-1;
+    for(let r=GRID-1;r>=0;r--) if(grid[r][c]!==-1){if(bot!==r){grid[bot][c]=grid[r][c];grid[r][c]=-1;}bot--;}
+    for(let r=bot;r>=0;r--){grid[r][c]=rnd();newCells.push([r,c]);}
+  }
+  render(newCells);
+  await wait(300);
+  const next=findGroups();
+  if(next.length){msg('ลูกโซ่! 🔥','');await processGroups(next);}
+}
+
+function flyImg(src,x1,y1,x2,y2,isBee){
+  const el=document.createElement('img');
+  el.className='fly'; el.src=src;
+  Object.assign(el.style,{left:`${x1-14}px`,top:`${y1-14}px`,opacity:'1',transform:'scale(1)'});
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.left=`${x2-14}px`; el.style.top=`${y2-14}px`;
+    el.style.opacity='0.2'; el.style.transform='scale(0.3)';
+  }));
+  if(isBee){
+    setTimeout(()=>{el.style.transform='scale(0) rotate(90deg)';el.style.opacity='0';setTimeout(()=>el.remove(),420);},680);
+  } else { setTimeout(()=>el.remove(),620); }
+}
+
+let _mt=null;
+function msg(text,cls){
+  const el=$('message'); el.textContent=text; el.className=cls||'';
+  clearTimeout(_mt); if(text) _mt=setTimeout(()=>{el.textContent='';el.className='';},2400);
+}
+
+function honeyWin(){
+  busy=true;
+  setTimeout(()=>{
+    $('ov-title').innerHTML='🎉 ยอดเยี่ยมไปเลยคุณ!';
+    $('ov-msg').innerHTML=
+      '<strong>สะสมน้ำผึ้งจนครบแล้ว!</strong><br><br>'+
+      'หวานฉ่ำขนาดนี้... เจ้าผึ้งสามตัวได้แต่ยืนมองตาปริบๆ ขโมยไปไม่ได้ซักหยด! 🐝❌<br><br>'+
+      'ในเมื่อได้น้ำผึ้งแท้มาเต็มไหแล้ว สนใจเปลี่ยนน้ำผึ้งของคุณให้กลายเป็น<br>'+
+      '<em style="color:#E65100">"สินค้าสุดพรีเมียม"</em> ที่เจ้าผึ้งไม่มีวันได้แตะพวกนี้หน่อยไหม? 👇🍯';
+    $('ov-shop-wrap').style.display='flex';
+    Object.assign($('ov-shop-wrap').style,{display:'flex',flexDirection:'column',gap:'10px'});
+    $('overlay').classList.add('show');
+  },450);
+}
+
+function endGame(){
+  setTimeout(()=>{
+    $('ov-title').textContent='🎉 เกมจบ!';
+    $('ov-msg').innerHTML=`คะแนน <strong style="color:#C67A00;font-size:1.3em">${score}</strong><br>น้ำผึ้ง ${honey}/${MAX_H} หยด`;
+    $('ov-shop-wrap').style.display='none';
+    $('overlay').classList.add('show');
+  },450);
+}
+
+startGame();
+</script>
+</body>
+</html>

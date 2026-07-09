@@ -18,13 +18,14 @@ import AboutPage, { ABOUT_CSS } from './components/AboutPage';
 import CartPage, { CART_CSS } from './components/CartPage';
 import CheckoutPage, { CHECKOUT_CSS } from './components/CheckoutPage';
 import DiscoverPage, { DISCOVER_CSS } from './components/DiscoverPage';
+import MembershipPage, { MEMBERSHIP_CSS } from './components/MembershipPage';
 import { SITE_CONTENT as c } from './constants/content';
 import { getCart } from './utils/cart';
 
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import { getSessionId } from './utils/session';
 
-type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about' | 'cart' | 'checkout' | 'discover';
+type Page = 'home' | 'experiences' | 'products' | 'activity-detail' | 'product-detail' | 'login' | 'profile' | 'about' | 'cart' | 'checkout' | 'discover' | 'membership';
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
@@ -126,6 +127,7 @@ export default function App() {
       <style>{CART_CSS}</style>
       <style>{CHECKOUT_CSS}</style>
       <style>{DISCOVER_CSS}</style>
+      <style>{MEMBERSHIP_CSS}</style>
       <ChatWidget lang={lang} />
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
@@ -154,6 +156,8 @@ export default function App() {
         <ExperiencesPage onSelectActivity={openActivity} currentUser={currentUser} lang={lang} />
       ) : page === 'discover' ? (
         <DiscoverPage lang={lang} onNavigate={navigate} />
+      ) : page === 'membership' ? (
+        <MembershipPage lang={lang} />
       ) : page === 'about' ? (
         <AboutPage lang={lang} />
       ) : page === 'checkout' ? (

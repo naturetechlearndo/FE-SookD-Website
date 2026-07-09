@@ -29,16 +29,24 @@ function embedVideoUrl(url: string): string {
 }
 
 interface HighlightSubSection {
+  sectionHeader?: string;
+  icon?: string;
   title: string;
-  description: string;
+  description?: string;
   image?: string;
-  exploreLabel: string;
+  exploreLabel?: string;
+  experienceLabel?: string;
+  experienceLink?: string;
+  gameLink?: string;
+  exploreLink?: string;
 }
 
 interface HighlightModal {
+  subtitle?: string;
   description: string;
   image?: string;
   exploreLabel: string;
+  exploreLink?: string;
   subSections?: HighlightSubSection[];
 }
 
@@ -84,14 +92,43 @@ const DISCOVER_PLACES: PlaceData[] = [
           description: 'วัดโปรดเกศเชษฐาราม ตั้งอยู่ที่อำเภอพระประแดง จังหวัดสมุทรปราการ สร้างขึ้นโดยได้รับอิทธิพลจากศิลปะจีนผสมไทย ในวัดมีพระอุโบสถที่งดงามและพระพุทธรูปปางมารวิชัยที่เป็นพระประธานวัด นี้ยังเป็นศูนย์รวมจิตใจของชาวบ้านในชุมชนและจัดกิจกรรมทางศาสนาเป็นประจำ',
           image: '/img/watprodgate.jpg',
           exploreLabel: 'สำรวจวัดโปรดเกศเชษฐาราม',
+          exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675251,100.5286457,3a,75y,73.58h,86.74t/data=!3m8!1e1!3m6!1s9xkO6-bd1G2EheSck3iKhw!2e0!3e11!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D3.2559134984606715%26panoid%3D9xkO6-bd1G2EheSck3iKhw%26yaw%3D73.57655347349332!7i16384!8i8192!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
           subSections: [
-            { title: 'พระวิหาร', description: 'เสริมดวงชะตา มงคล ๑๐๘ กับพระพุทธไสยาสน์', image: '/img/pravihan.jpg', exploreLabel: 'สำรวจพระวิหาร' },
-            { title: 'พระมณฑป', description: 'เลี้ยงเซียมซี กับปู่ฤาษีนาคลิทธิโคดม', image: '/img/pramontop.jpg', exploreLabel: 'สำรวจพระมณฑป' },
+            { title: 'พระวิหาร', description: 'เสริมดวงชะตา มงคล ๑๐๘ กับพระพุทธไสยาสน์', image: '/img/pravihan.jpg', exploreLabel: 'สำรวจพระวิหาร',
+              experienceLink: 'https://bangkachao.mxrth.co/phraviharn/index.html',
+              exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675734,100.5288045,3a,75y,54.18h,80.29t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgICUoo2sTg!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FAFP8RcMczgHs1RIu4WeqMNQrTaNAt2yeP0-JLMEkQUSluxOkMGyHq8cWlCGh6Yy8-Kwn1B_v6kYAYy0PM-RQcYmyfqgl8xLmbZqq0y-CSaDp_YCz3u1g_G68XpGp0f-qDecrPYutkMGf%3Dw900-h600-k-no-pi9.712856614663536-ya340.17846039924973-ro0-fo100!7i7680!8i3840!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
+            },
+            { title: 'พระมณฑป', description: 'เลี้ยงเซียมซี กับปู่ฤาษีนาคลิทธิโคดม', image: '/img/pramontop.jpg', exploreLabel: 'สำรวจพระมณฑป',
+              experienceLink: 'https://bangkachao.mxrth.co/phramondop/index.html',
+              exploreLink: 'https://www.google.com/maps/place/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9B%E0%B8%A3%E0%B8%94%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B9%80%E0%B8%8A%E0%B8%A9%E0%B8%90%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1+%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87/@13.6675251,100.5286457,3a,75y,83.12h,84.79t/data=!3m7!1e1!3m5!1s9xkO6-bd1G2EheSck3iKhw!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D5.2147582870416755%26panoid%3D9xkO6-bd1G2EheSck3iKhw%26yaw%3D83.12037990502836!7i16384!8i8192!4m6!3m5!1s0x30e2a21fc18e127b:0x9ca6c7487b44a12d!8m2!3d13.66747!4d100.5287382!16s%2Fg%2F1hm2lkypq?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
+            },
           ],
         },
       },
-      { name: 'พิพิธภัณฑ์พื้นบ้านคลองบน', nameEn: 'Klong Bon Folk Museum', image: '/img/discover-museum.jpg' },
-      { name: 'ผึ้งชันโรง', nameEn: 'Stingless Bee', image: '/img/discover-bee.jpg' },
+      { name: 'พิพิธภัณฑ์พื้นบ้านคลองบน', nameEn: 'Klong Bon Folk Museum', image: '/img/discover-museum.jpg',
+        modal: {
+          description: 'พิพิธภัณฑ์พื้นบ้านคลองบน ตั้งอยู่ที่ตำบลบางกอบัว อำเภอพระประแดง จังหวัดสมุทรปราการ ก่อตั้งโดยนายแดง ไกรสมโภช ซึ่งเป็นชาวบ้านในชุมชนที่มีความหลงใหลในการสะสมของเก่าและของโบราณที่หายาก เช่น เครื่องเงิน เครื่องลายคราม เครื่องครัว และเครื่องมือการเกษตร เพื่อเป็นแหล่งศึกษาเรียนรู้และอนุรักษ์วิถีชีวิตของชุมชนดั้งเดิม',
+          image: '/img/banklongbon.jpg',
+          exploreLabel: 'สำรวจพิพิธภัณฑ์พื้นบ้านคลองบน',
+          exploreLink: 'https://www.google.com/maps/place/%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B8%9A%E0%B8%99/@13.697497,100.5712505,3a,75y,261.34h,75.52t/data=!3m7!1e1!3m5!1sqqC1csRdY1kO6Bi5oGEkyA!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D14.477671552547747%26panoid%3DqqC1csRdY1kO6Bi5oGEkyA%26yaw%3D261.3410752219753!7i16384!8i8192!4m6!3m5!1s0x30e29f79c8ec6d27:0x810fee238fe07c26!8m2!3d13.6974483!4d100.5711631!16s%2Fg%2F11gf9qbc6r?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
+          subSections: [
+            { sectionHeader: 'กิจกรรม', icon: '🏺', title: 'Visit the antiques', image: '/img/banklongbonact.jpg',
+              experienceLabel: 'ร่วมกิจกรรม', experienceLink: 'https://bangkachao.mxrth.co/museum/index.html' },
+          ],
+        },
+      },
+      { name: 'ผึ้งชันโรง', nameEn: 'Stingless Bee', image: '/img/discover-bee.jpg',
+        modal: {
+          subtitle: 'ต.บางน้ำผึ้ง อ.พระประแดง จ.สมุทรปราการ',
+          description: 'สวนเกษตรดั้งเดิมในคุ้งบางกะเจ้าโดยการเลี้ยงผึ้งชันโรงได้กลายเป็นเครื่องมือทางสังคมที่บังคับให้ชุมชนต้องร่วมใจกันงดใช้สารเคมีและยาฆ่าแมลงในสวนเพื่อความอยู่รอดของผึ้ง ส่งผลให้เกิดข้อตกลงร่วมในการปกป้องพื้นที่สีเขียว คืนอากาศบริสุทธิ์และสิ่งแวดล้อมที่ปลอดภัยให้คนในชุมชน พร้อมทั้งสร้างระบบเศรษฐกิจฐานรากที่ช่วยให้ผู้สูงอายุและชาวบ้านมีรายได้เสริมที่มั่นคงจากสวนหลังบ้านของตนเองอย่างยั่งยืน',
+          image: '/img/channarong.jpg',
+          exploreLabel: 'สำรวจผึ้งชันโรงบางน้ำผึ้ง',
+          exploreLink: 'https://www.google.com/maps/@13.6772865,100.5740957,3a,75y,76.17h,84.91t/data=!3m7!1e1!3m5!1s7EqwUULW0Xx3wrlPqVGLog!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D5.087855876007708%26panoid%3D7EqwUULW0Xx3wrlPqVGLog%26yaw%3D76.17240953897732!7i16384!8i8192?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
+          subSections: [
+            { sectionHeader: 'กิจกรรม', title: 'Honey Crush', description: 'สัมผัสประสบการณ์เก็บน้ำผึ้ง', image: '/img/channaronggame.jpg', experienceLabel: 'ร่วมกิจกรรม', gameLink: '/games/honey-crush.html' },
+          ],
+        },
+      },
       { name: 'ผ้ามัดย้อมบางกะเจ้า', nameEn: 'Bang Kachao Tie-Dye', image: '/img/discover-tiedye.jpg' },
     ],
   },
@@ -168,6 +205,21 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  const [gameUrl, setGameUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.action === 'shop') {
+        const ids: string[] = e.data.featured ?? [];
+        if (ids.length) sessionStorage.setItem('featuredProducts', JSON.stringify(ids));
+        setGameUrl(null);
+        onNavigate?.('products');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [onNavigate]);
 
   useEffect(() => {
     if (!tabsRef.current) return;
@@ -415,6 +467,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
               ‹ {isTH ? 'กลับ' : 'Back'}
             </button>
             <h2 className="hlmodal-title">{isTH ? activeHighlight.name : activeHighlight.nameEn}</h2>
+            {activeHighlight.modal.subtitle && <p className="hlmodal-subtitle">📍 {activeHighlight.modal.subtitle}</p>}
             <div className="hlmodal-divider" />
 
             {/* Main section */}
@@ -424,7 +477,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
               )}
               <div className="hlmodal-main-body">
                 <p className="hlmodal-desc">{activeHighlight.modal.description}</p>
-                <button className="hlmodal-explore-btn">
+                <button className="hlmodal-explore-btn" onClick={() => activeHighlight.modal!.exploreLink && window.open(activeHighlight.modal!.exploreLink, '_blank')}>
                   <span className="hlmodal-explore-icon">📍</span>
                   {activeHighlight.modal.exploreLabel}
                 </button>
@@ -433,15 +486,29 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
 
             {/* Sub-sections */}
             {activeHighlight.modal.subSections?.map((sub, i) => (
-              <div key={i} className="hlmodal-sub">
+              <div key={i}>
+                {sub.sectionHeader && <h3 className="hlmodal-section-header">{sub.sectionHeader}</h3>}
+                <div className="hlmodal-sub">
                 {sub.image && <img src={sub.image} alt={sub.title} className="hlmodal-sub-img" />}
                 <div className="hlmodal-sub-body">
-                  <h3 className="hlmodal-sub-title">{sub.title}</h3>
-                  <div className="hlmodal-sub-row">
-                    <p className="hlmodal-sub-desc">{sub.description}</p>
-                    <button className="hlmodal-exp-btn">{isTH ? 'สัมผัสประสบการณ์' : 'Experience'} ›</button>
-                  </div>
-                  <button className="hlmodal-explore-btn" style={{width:'100%',marginTop:'.7rem'}}>{sub.exploreLabel}</button>
+                  <h3 className="hlmodal-sub-title">{sub.icon ? `${sub.icon} ` : ''}{sub.title}</h3>
+                  {(sub.description || sub.experienceLabel) && (
+                    <div className="hlmodal-sub-row">
+                      {sub.description && <p className="hlmodal-sub-desc">{sub.description}</p>}
+                      {sub.experienceLabel && (
+                        <button className="hlmodal-exp-btn" onClick={() => {
+                          if (sub.gameLink) { setActiveHighlight(null); setGameUrl(sub.gameLink); }
+                          else if (sub.experienceLink) window.open(sub.experienceLink, '_blank');
+                        }}>
+                          {sub.experienceLabel} ›
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {sub.exploreLabel && (
+                    <button className="hlmodal-explore-btn" style={{width:'100%',marginTop:'.7rem'}} onClick={() => sub.exploreLink && window.open(sub.exploreLink, '_blank')}>{sub.exploreLabel}</button>
+                  )}
+                </div>
                 </div>
               </div>
             ))}
@@ -453,6 +520,23 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game overlay */}
+      {gameUrl && (
+        <div className="game-overlay">
+          <div className="game-modal">
+            <button className="game-back" onClick={() => setGameUrl(null)}>
+              ‹ {isTH ? 'กลับ' : 'Back'}
+            </button>
+            <iframe
+              src={gameUrl}
+              className="game-frame"
+              title="Mini Game"
+              allow="autoplay"
+            />
           </div>
         </div>
       )}
@@ -693,6 +777,34 @@ export const DISCOVER_CSS = `
   font-family: var(--font-th);
 }
 
+/* Game overlay */
+.game-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+}
+.game-modal {
+  width: min(96vw, 520px);
+  height: min(96vh, 700px);
+  background: #0C0400;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+}
+.game-back {
+  flex-shrink: 0;
+  background: none; border: none;
+  color: #FFE082; padding: .6rem 1rem;
+  font-size: .9rem; cursor: pointer;
+  text-align: left;
+  font-family: var(--font-th);
+}
+.game-back:hover { color: #FFD54F; }
+.game-frame {
+  flex: 1; border: none; width: 100%;
+}
+
 /* Highlight Modal */
 .hlmodal-overlay {
   position: fixed; inset: 0; z-index: 1000;
@@ -716,7 +828,11 @@ export const DISCOVER_CSS = `
 .hlmodal-back:hover { border-color: var(--forest); color: var(--forest); }
 .hlmodal-title {
   font-size: 1.5rem; font-weight: 700; color: var(--text);
-  font-family: var(--font-th); margin-bottom: .8rem;
+  font-family: var(--font-th); margin-bottom: .3rem;
+}
+.hlmodal-subtitle {
+  font-size: .88rem; color: #888; font-family: var(--font-th);
+  margin-bottom: .8rem;
 }
 .hlmodal-divider { border: none; border-top: 1.5px solid #e0d8cc; margin-bottom: 1.5rem; }
 .hlmodal-main {
@@ -745,7 +861,12 @@ export const DISCOVER_CSS = `
 }
 .hlmodal-sub-img {
   width: 180px; flex-shrink: 0; border-radius: 10px;
-  object-fit: cover; aspect-ratio: 4/3; background: #e0e8e0;
+  object-fit: contain; background: #e0e8e0;
+}
+.hlmodal-section-header {
+  font-size: 1rem; font-weight: 700; color: var(--forest);
+  font-family: var(--font-th); margin: 1rem 0 .5rem;
+  text-transform: uppercase; letter-spacing: .05em;
 }
 .hlmodal-sub-body { flex: 1; }
 .hlmodal-sub-title {

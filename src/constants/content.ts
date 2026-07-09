@@ -5,7 +5,7 @@ export const SITE_CONTENT: SiteContent = {
     { label: 'Experiences', href: '#experiences', page: 'experiences' },
     { label: 'Product',     href: '#products',    page: 'products' },
     { label: 'Discover',    href: '#discover',   page: 'discover' },
-    { label: 'Membership',  href: '#membership' },
+    { label: 'Membership',  href: '#membership', page: 'membership' },
     { label: 'About',       href: '#about',       page: 'about' },
   ],
 
