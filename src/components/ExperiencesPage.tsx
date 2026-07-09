@@ -49,7 +49,20 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
   const [showAll, setShowAll] = useState(false);
   const [activeType, setActiveType] = useState('ทั้งหมด');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('featuredActivities');
+    if (stored) {
+      try {
+        const ids = JSON.parse(stored);
+        setFeaturedIds(ids);
+        setShowAll(true);
+        sessionStorage.removeItem('featuredActivities');
+      } catch {}
+    }
+  }, []);
 
   useEffect(() => {
     api.activities.getAll()
@@ -90,7 +103,14 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
     return matchSearch && matchType;
   });
 
-  const visible = showAll ? filtered : filtered.slice(0, VISIBLE_COUNT);
+  const sorted = featuredIds.length > 0
+    ? [
+        ...featuredIds.map(id => filtered.find(a => a.id === id)).filter(Boolean) as Activity[],
+        ...filtered.filter(a => !featuredIds.includes(a.id)),
+      ]
+    : filtered;
+
+  const visible = showAll ? sorted : sorted.slice(0, VISIBLE_COUNT);
 
   return (
     <>
@@ -180,7 +200,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
           <>
             <div className="exp-grid">
               {visible.map(a => (
-                <ActivityCard key={a.id} activity={a} lang={lang} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
+                <ActivityCard key={a.id} activity={a} lang={lang} isFeatured={featuredIds.includes(a.id)} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
               ))}
             </div>
 
@@ -207,7 +227,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
   );
 }
 
-function ActivityCard({ activity: a, onClick, lang = 'TH' }: { activity: Activity; onClick: () => void; lang?: 'TH' | 'ENG' }) {
+function ActivityCard({ activity: a, onClick, lang = 'TH', isFeatured = false }: { activity: Activity; onClick: () => void; lang?: 'TH' | 'ENG'; isFeatured?: boolean }) {
   const tags = a.type?.split(',').map(t => t.trim()) ?? [];
   const imgSrc = driveThumb(a.image);
   const duration = shortDuration(a.date);
@@ -216,6 +236,11 @@ function ActivityCard({ activity: a, onClick, lang = 'TH' }: { activity: Activit
     <div className="exp-card" onClick={onClick} role="button" tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onClick()}>
       <div className="exp-card__img-wrap">
+        {isFeatured && (
+          <div style={{position:'absolute',top:'8px',left:'8px',zIndex:2,background:'#E65100',color:'#fff',fontSize:'.72rem',fontWeight:700,padding:'.2rem .6rem',borderRadius:'50px',lineHeight:1.3}}>
+            🎨 แนะนำพิเศษ
+          </div>
+        )}
         <img
           src={imgSrc}
           alt={a.name}

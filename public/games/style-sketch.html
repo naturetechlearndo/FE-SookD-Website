@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Style Sketch</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Kanit','Segoe UI',sans-serif;background:#FFF9F0;min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center}
+.screen.active{display:flex}
+
+/* WELCOME */
+#welcome{justify-content:center;text-align:center;padding:2.5rem 1.5rem;background:linear-gradient(160deg,#fff9f0 0%,#ffe8cc 100%)}
+.title-emoji{font-size:3rem;margin-bottom:.4rem;display:block}
+.game-title{font-size:2.3rem;font-weight:800;color:#1a0f00;letter-spacing:-.02em;margin-bottom:.5rem}
+.game-desc{font-size:.88rem;color:#6b4c1e;line-height:1.8;max-width:310px;margin:0 auto 2rem}
+.sec-label{font-size:.75rem;font-weight:700;color:#5a3200;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem}
+.item-cards{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap}
+.item-card{background:#fff;border:2.5px solid #e8d0aa;border-radius:20px;padding:1.4rem 1rem;width:140px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;display:flex;flex-direction:column;align-items:center;gap:.7rem;box-shadow:0 4px 14px rgba(210,130,0,.1)}
+.item-card:hover,.item-card:active{border-color:#E65100;transform:translateY(-5px);box-shadow:0 8px 24px rgba(230,81,0,.22)}
+.item-card svg{width:84px;height:84px}
+.item-card-name{font-size:.86rem;font-weight:700;color:#1a0f00}
+
+/* MODE */
+#mode{justify-content:flex-start;text-align:center;background:linear-gradient(160deg,#fff9f0 0%,#ffe8cc 100%)}
+.scr-header{display:flex;align-items:center;padding:.6rem 1rem;width:100%;gap:.5rem;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);flex-shrink:0}
+.hdr-back{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#4a2c00;padding:.2rem .6rem}
+.hdr-title{flex:1;text-align:center;font-size:.95rem;font-weight:700;color:#1a0f00}
+.mode-body{padding:1.4rem 1.2rem;width:100%;display:flex;flex-direction:column;align-items:center;gap:1.1rem}
+.mode-preview{width:110px;height:110px;display:flex;align-items:center;justify-content:center}
+.mode-cards{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.mode-card{background:#fff;border:2.5px solid #e8d0aa;border-radius:16px;padding:1.1rem .8rem;width:132px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s;text-align:center}
+.mode-card:hover,.mode-card.sel{border-color:#E65100;background:#fff5ec;transform:translateY(-3px)}
+.mode-icon{font-size:2.1rem;display:block;margin-bottom:.4rem}
+.mode-name{font-size:.86rem;font-weight:700;color:#1a0f00}
+.mode-hint{font-size:.7rem;color:#888;margin-top:.3rem;line-height:1.4}
+.pat-sec{width:100%;display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.pat-row{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
+.p-thumb{border:2.5px solid #e8d0aa;border-radius:12px;padding:.45rem;cursor:pointer;text-align:center;transition:border-color .2s;background:#fff;display:flex;flex-direction:column;align-items:center;gap:.25rem;width:76px}
+.p-thumb:hover,.p-thumb.sel{border-color:#E65100}
+.p-thumb canvas{display:block;width:52px;height:52px;border-radius:5px}
+.p-thumb-name{font-size:.66rem;font-weight:600;color:#4a2c00}
+.pri-btn{background:#E65100;color:#fff;border:none;border-radius:50px;padding:.72rem 2.4rem;font-size:.92rem;font-weight:700;cursor:pointer;transition:background .2s;font-family:inherit}
+.pri-btn:hover{background:#bf4000}
+.pri-btn:disabled{background:#ccc;cursor:default}
+
+/* DRAWING */
+#drawing{background:#F7F3ED;justify-content:flex-start}
+.draw-hdr{display:flex;align-items:center;padding:.5rem .8rem;width:100%;gap:.6rem;background:#fff;border-bottom:1px solid #eee;flex-shrink:0}
+.drw-back{background:none;border:1.5px solid #ddd;border-radius:50px;padding:.28rem .75rem;cursor:pointer;font-size:.82rem;color:#555;transition:all .15s;font-family:inherit}
+.drw-back:hover{border-color:#E65100;color:#E65100}
+.drw-title{flex:1;text-align:center;font-size:.92rem;font-weight:700;color:#1a0f00}
+.done-btn{background:#1b4332;color:#fff;border:none;border-radius:50px;padding:.4rem 1rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.done-btn:hover{background:#123028}
+.cv-area{display:flex;flex-direction:column;align-items:center;flex:1;width:100%;overflow:hidden}
+#main-canvas{display:block;touch-action:none;cursor:crosshair;margin:.7rem auto 0}
+.tools{width:100%;padding:.55rem .7rem;background:#fff;border-top:1px solid #eee;display:flex;flex-direction:column;gap:.55rem}
+.t-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;justify-content:center}
+.c-sw{width:29px;height:29px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s;flex-shrink:0}
+.c-sw:hover,.c-sw.on{transform:scale(1.22);border-color:#1a0f00!important}
+.c-sw-w{box-shadow:inset 0 0 0 1.5px #ccc}
+.b-btn{background:#fff;border:2px solid #e0d0b8;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;width:36px;height:36px;font-family:inherit}
+.b-btn:hover,.b-btn.on{border-color:#E65100;background:#fff5ec}
+.t-btn{background:#fff;border:2px solid #e0d0b8;border-radius:9px;cursor:pointer;padding:.3rem .6rem;font-size:.76rem;font-weight:600;color:#3a2500;transition:all .15s;display:flex;align-items:center;gap:.22rem;font-family:inherit}
+.t-btn:hover{border-color:#E65100;background:#fff5ec}
+.t-btn.on{border-color:#E65100;background:#fff5ec;color:#E65100}
+
+/* RESULT */
+#result{justify-content:center;text-align:center;padding:2rem 1.5rem;background:linear-gradient(160deg,#fff9f0 0%,#ffe8cc 100%)}
+.res-emoji{font-size:2.8rem;display:block;margin-bottom:.3rem}
+.res-title{font-size:1.8rem;font-weight:800;color:#1a0f00;margin-bottom:.3rem}
+.res-sub{font-size:.86rem;color:#6b4c1e;margin-bottom:1.2rem}
+.res-frame{background:#fff;border-radius:18px;padding:1rem;box-shadow:0 8px 32px rgba(210,130,0,.2);display:inline-block;margin-bottom:1.4rem}
+#result-canvas{display:block}
+.res-acts{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.r-btn{padding:.68rem 1.5rem;border-radius:50px;font-size:.88rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+.r-pri{background:#E65100;color:#fff}.r-pri:hover{background:#bf4000}
+.r-sec{background:#fff;color:#1a0f00;border:2px solid #e8d0aa}.r-sec:hover{border-color:#E65100}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active">
+  <span class="title-emoji">🎨</span>
+  <h1 class="game-title">Style Sketch</h1>
+  <p class="game-desc">ปลดปล่อยจินตนาการบนผืนผ้า! เลือกไอเทมโปรดของคุณ ไม่ว่าจะเป็น เสื้อยืดสุดชิค หรือ กระเป๋าพกพาสุดเก๋ แล้วสะบัดพู่กันครีเอทลายสไตล์คุณ จะวาดเองตามใจคิด หรือลอกลายตามแบบสุดเป๊ะก็สนุกได้ไม่ซ้ำใคร!</p>
+  <p class="sec-label">เลือกไอเทม</p>
+  <div class="item-cards">
+    <div class="item-card" onclick="pickItem('tshirt')">
+      <svg viewBox="0 0 100 92" fill="none">
+        <path d="M28 3L4 20L1 35L21 40L21 89L79 89L79 40L99 35L96 20L72 3Q60 14 50 14Q40 14 28 3Z"
+          fill="#FFE8CC" stroke="#E65100" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+      <span class="item-card-name">เสื้อยืด</span>
+    </div>
+    <div class="item-card" onclick="pickItem('bag')">
+      <svg viewBox="0 0 100 108" fill="none">
+        <path d="M34 32Q34 10 50 10Q66 10 66 32" stroke="#E65100" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <rect x="6" y="32" width="88" height="68" rx="10" fill="#FFE8CC" stroke="#E65100" stroke-width="2.5"/>
+      </svg>
+      <span class="item-card-name">กระเป๋าพกพา</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODE -->
+<div id="mode" class="screen">
+  <div class="scr-header">
+    <button class="hdr-back" onclick="go('welcome')">‹</button>
+    <span class="hdr-title">เลือกโหมดการวาด</span>
+    <span style="width:38px"></span>
+  </div>
+  <div class="mode-body">
+    <div class="mode-preview" id="mode-preview"></div>
+    <div class="mode-cards">
+      <div class="mode-card" id="mc0" onclick="pickMode('custom')">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-name">วาดเอง</div>
+        <div class="mode-hint">อิสระตามจินตนาการ<br>ไม่มีขีดจำกัด!</div>
+      </div>
+      <div class="mode-card" id="mc1" onclick="pickMode('trace')">
+        <span class="mode-icon">🖼️</span>
+        <div class="mode-name">ลอกลาย</div>
+        <div class="mode-hint">มีแบบให้ตาม<br>เป๊ะได้ไม่ยาก!</div>
+      </div>
+    </div>
+    <div id="pat-sec" class="pat-sec" style="display:none">
+      <p class="sec-label" style="margin:0">เลือกลาย</p>
+      <div class="pat-row" id="pat-row"></div>
+    </div>
+    <button class="pri-btn" id="start-btn" disabled onclick="startDraw()">เริ่มวาด! 🎨</button>
+  </div>
+</div>
+
+<!-- DRAWING -->
+<div id="drawing" class="screen">
+  <div class="draw-hdr">
+    <button class="drw-back" onclick="go('mode')">‹ กลับ</button>
+    <span class="drw-title" id="drw-title">วาดลาย</span>
+    <button class="done-btn" onclick="finish()">เสร็จแล้ว ✨</button>
+  </div>
+  <div class="cv-area">
+    <canvas id="main-canvas"></canvas>
+  </div>
+  <div class="tools">
+    <div class="t-row" id="color-row"></div>
+    <div class="t-row">
+      <div id="brush-row" style="display:flex;gap:.38rem;align-items:center"></div>
+      <button class="t-btn" id="era-btn" onclick="toggleEra()">🧹 ยางลบ</button>
+      <button class="t-btn" onclick="undo()">↩ ย้อน</button>
+      <button class="t-btn" onclick="clr()">🗑️ ล้าง</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <span class="res-emoji">🎉</span>
+  <h2 class="res-title">ว้าว ผลงานสวยมากครับ!</h2>
+  <p class="res-sub" style="max-width:300px;line-height:1.7;font-size:.85rem">
+    งานดีไซน์สุดยูนีคชิ้นนี้ จะปล่อยให้อยู่แค่ในรูปก็น่าเสียดายแย่เลยใช่ไหมล่ะครับ?<br>
+    จะดีกว่าไหมถ้าคุณสามารถ <strong>ทำเสื้อแมตช์ลายนี้ใส่เองได้จริงๆ</strong> ผ่านกิจกรรมผ้ามัดย้อมสนุกๆ ของเรา!<br><br>
+    สะดวกแบบไหนก็เลือกได้เลย:
+  </p>
+  <div class="res-frame"><canvas id="result-canvas"></canvas></div>
+  <div class="res-acts">
+    <button class="r-btn r-sec" onclick="goActivity()">🎨 ร่วมกิจกรรมผ้ามัดย้อม</button>
+    <button class="r-btn r-pri" onclick="goShop()">🛍️ ช้อปสินค้าลายสำเร็จรูป</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+const G={item:null,mode:null,pat:null,color:'#E65100',size:7,era:false};
+let strokes=[],cur=null,pressing=false;
+let CV,CX,CW,CH,IX,IY,IW,IH;
+
+// ── COLORS ─────────────────────────────────────────────
+const COLORS=['#E91E63','#E65100','#FF9800','#FFD600','#4CAF50','#2196F3','#9C27B0','#00BCD4','#795548','#607D8B','#FFFFFF','#111111'];
+
+// ── PATTERNS ───────────────────────────────────────────
+const PATS=[{id:'tiedye',name:'มัดย้อม'},{id:'flower',name:'ดอกไม้'},{id:'wave',name:'คลื่น'},{id:'geo',name:'เพชร'}];
+
+function drawPat(ctx,id,x,y,w,h,alpha){
+  ctx.save();ctx.globalAlpha=alpha??0.22;
+  ctx.strokeStyle='#C75000';ctx.fillStyle='#C75000';
+  if(id==='tiedye'){
+    [[.5,.45],[.22,.25],[.78,.72]].forEach(([px,py])=>{
+      for(let r=15;r<=130;r+=16){ctx.beginPath();ctx.arc(x+w*px,y+h*py,r,0,Math.PI*2);ctx.lineWidth=1.3;ctx.stroke();}
+    });
+  }else if(id==='flower'){
+    const st=Math.min(w,h)/4.2;
+    for(let row=0;row<=h/st+1;row++)for(let col=0;col<=w/st+(row%2?.5:0);col++){
+      const cx=x+col*st-(row%2?st/2:0),cy=y+row*st,r=st*.3;
+      for(let p=0;p<6;p++){const a=p/6*Math.PI*2;ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*r*.85,cy+Math.sin(a)*r*.85,r*.48,r*.2,a,0,Math.PI*2);ctx.lineWidth=1.2;ctx.stroke();}
+      ctx.beginPath();ctx.arc(cx,cy,r*.2,0,Math.PI*2);ctx.fill();
+    }
+  }else if(id==='wave'){
+    for(let i=0;i<9;i++){const by=y+(i+.5)*h/9;ctx.beginPath();ctx.moveTo(x,by);for(let px=0;px<=w;px+=4)ctx.lineTo(x+px,by+Math.sin(px/w*Math.PI*5)*9);ctx.lineWidth=1.5;ctx.stroke();}
+  }else if(id==='geo'){
+    const st=Math.min(w,h)/5.2;
+    for(let row=-1;row<=h/st+2;row++)for(let col=-1;col<=w/st+2;col++){
+      const cx=x+col*st+(row%2?st/2:0),cy=y+row*st,r=st*.4;
+      ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.lineTo(cx+r,cy);ctx.lineTo(cx,cy+r);ctx.lineTo(cx-r,cy);ctx.closePath();ctx.lineWidth=1.2;ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+// ── ITEM PATHS ─────────────────────────────────────────
+function tshirtPath(ctx,x,y,w,h){
+  ctx.moveTo(x+w*.27,y);
+  ctx.lineTo(x+w*.03,y+h*.15);ctx.lineTo(x,y+h*.31);ctx.lineTo(x+w*.20,y+h*.36);
+  ctx.lineTo(x+w*.20,y+h);ctx.lineTo(x+w*.80,y+h);
+  ctx.lineTo(x+w*.80,y+h*.36);ctx.lineTo(x+w,y+h*.31);ctx.lineTo(x+w*.97,y+h*.15);
+  ctx.lineTo(x+w*.73,y);
+  ctx.bezierCurveTo(x+w*.73,y,x+w*.63,y+h*.13,x+w*.5,y+h*.14);
+  ctx.bezierCurveTo(x+w*.5,y+h*.14,x+w*.37,y+h*.13,x+w*.27,y);
+  ctx.closePath();
+}
+function bagBodyPath(ctx,x,y,w,h){
+  const by=y+h*.2,bh=h*.8,r=11;
+  ctx.moveTo(x+r,by);ctx.lineTo(x+w-r,by);ctx.arc(x+w-r,by+r,r,-Math.PI/2,0);
+  ctx.lineTo(x+w,by+bh-r);ctx.arc(x+w-r,by+bh-r,r,0,Math.PI/2);
+  ctx.lineTo(x+r,by+bh);ctx.arc(x+r,by+bh-r,r,Math.PI/2,Math.PI);
+  ctx.lineTo(x,by+r);ctx.arc(x+r,by+r,r,Math.PI,-Math.PI/2);ctx.closePath();
+}
+function clipItem(ctx,item,x,y,w,h){
+  ctx.beginPath();
+  if(item==='tshirt')tshirtPath(ctx,x,y,w,h);else bagBodyPath(ctx,x,y,w,h);
+  ctx.clip();
+}
+function strokeItem(ctx,item,x,y,w,h,color,lw){
+  ctx.strokeStyle=color??'#bbb';ctx.lineWidth=lw??2;
+  if(item==='tshirt'){ctx.beginPath();tshirtPath(ctx,x,y,w,h);ctx.stroke();}
+  else{
+    // handles
+    ctx.save();ctx.strokeStyle='#ccc';ctx.lineWidth=3;ctx.lineCap='round';
+    const hx1=x+w*.28,hx2=x+w*.72,hy=y+h*.01,by=y+h*.2;
+    ctx.beginPath();ctx.moveTo(hx1,by);ctx.bezierCurveTo(hx1,hy,hx1+w*.12,hy,hx1+w*.12,by);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(hx2-w*.12,by);ctx.bezierCurveTo(hx2-w*.12,hy,hx2,hy,hx2,by);ctx.stroke();
+    ctx.restore();
+    ctx.beginPath();bagBodyPath(ctx,x,y,w,h);ctx.stroke();
+  }
+}
+
+// ── CANVAS ─────────────────────────────────────────────
+function setupCanvas(){
+  CV=document.getElementById('main-canvas');CX=CV.getContext('2d');
+  const vw=Math.min(window.innerWidth-16,400);
+  IW=vw*.82;IH=G.item==='tshirt'?IW*1.05:IW*1.18;
+  CW=vw;CH=IH+36;IX=(CW-IW)/2;IY=18;
+  CV.width=CW;CV.height=CH;CV.style.width=CW+'px';CV.style.height=CH+'px';
+}
+function redraw(){
+  if(!CX)return;
+  CX.clearRect(0,0,CW,CH);
+  // white fill
+  CX.save();clipItem(CX,G.item,IX,IY,IW,IH);CX.fillStyle='#fff';CX.fillRect(0,0,CW,CH);CX.restore();
+  // drawing (clipped)
+  CX.save();clipItem(CX,G.item,IX,IY,IW,IH);
+  if(G.mode==='trace'&&G.pat)drawPat(CX,G.pat,IX,IY,IW,IH);
+  strokes.forEach(s=>renderStroke(CX,s));
+  if(cur)renderStroke(CX,cur);
+  CX.restore();
+  // outline
+  strokeItem(CX,G.item,IX,IY,IW,IH);
+}
+function renderStroke(ctx,s){
+  if(!s||s.pts.length<2)return;
+  ctx.save();ctx.globalCompositeOperation=s.era?'destination-out':'source-over';
+  ctx.strokeStyle=s.color;ctx.lineWidth=s.size;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(s.pts[0].x,s.pts[0].y);
+  for(let i=1;i<s.pts.length;i++){const p=s.pts[i-1],q=s.pts[i];ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);}
+  ctx.stroke();ctx.restore();
+}
+
+// ── POINTER ────────────────────────────────────────────
+function getXY(e){
+  const r=CV.getBoundingClientRect(),sx=CV.width/r.width,sy=CV.height/r.height;
+  const t=e.touches?e.touches[0]:e;
+  return{x:(t.clientX-r.left)*sx,y:(t.clientY-r.top)*sy};
+}
+function pDown(e){e.preventDefault();pressing=true;const p=getXY(e);cur={pts:[p],color:G.era?'#fff':G.color,size:G.era?G.size*3:G.size,era:G.era};}
+function pMove(e){e.preventDefault();if(!pressing||!cur)return;cur.pts.push(getXY(e));redraw();}
+function pUp(e){e.preventDefault();if(!pressing)return;pressing=false;if(cur&&cur.pts.length>1)strokes.push(cur);cur=null;redraw();}
+let bound=false;
+function bindCanvas(){
+  if(bound)return;bound=true;
+  CV.addEventListener('mousedown',pDown);CV.addEventListener('mousemove',pMove);
+  CV.addEventListener('mouseup',pUp);CV.addEventListener('mouseleave',pUp);
+  CV.addEventListener('touchstart',pDown,{passive:false});
+  CV.addEventListener('touchmove',pMove,{passive:false});
+  CV.addEventListener('touchend',pUp,{passive:false});
+}
+
+// ── TOOLS ──────────────────────────────────────────────
+function buildTools(){
+  const cr=document.getElementById('color-row');cr.innerHTML='';
+  COLORS.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='c-sw'+(c===G.color?' on':'')+(c==='#FFFFFF'?' c-sw-w':'');
+    el.style.background=c;el.dataset.c=c;
+    el.onclick=()=>{G.color=c;G.era=false;document.querySelectorAll('.c-sw').forEach(s=>s.classList.toggle('on',s.dataset.c===c));document.getElementById('era-btn').classList.remove('on');};
+    cr.appendChild(el);
+  });
+  const br=document.getElementById('brush-row');br.innerHTML='';
+  [3,7,14,22].forEach(sz=>{
+    const el=document.createElement('button');el.className='b-btn'+(sz===G.size?' on':'');el.dataset.sz=sz;
+    const d=Math.min(sz*1.6,22);el.innerHTML=`<span style="width:${d}px;height:${d}px;border-radius:50%;background:#2d1b00;display:block"></span>`;
+    el.style.width='36px';el.style.height='36px';
+    el.onclick=()=>{G.size=sz;document.querySelectorAll('.b-btn').forEach(b=>b.classList.toggle('on',+b.dataset.sz===sz));};
+    br.appendChild(el);
+  });
+}
+function toggleEra(){G.era=!G.era;document.getElementById('era-btn').classList.toggle('on',G.era);if(!G.era)document.querySelector(`.c-sw[data-c="${G.color}"]`)?.classList.add('on');else document.querySelectorAll('.c-sw').forEach(s=>s.classList.remove('on'));}
+function undo(){strokes.pop();redraw();}
+function clr(){strokes=[];cur=null;redraw();}
+
+// ── NAVIGATION ─────────────────────────────────────────
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+const TSVG=`<svg viewBox="0 0 100 92" fill="none" style="width:110px;height:100px"><path d="M28 3L4 20L1 35L21 40L21 89L79 89L79 40L99 35L96 20L72 3Q60 14 50 14Q40 14 28 3Z" fill="#FFE8CC" stroke="#E65100" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+const BSVG=`<svg viewBox="0 0 100 108" fill="none" style="width:100px;height:108px"><path d="M34 32Q34 10 50 10Q66 10 66 32" stroke="#E65100" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="6" y="32" width="88" height="68" rx="10" fill="#FFE8CC" stroke="#E65100" stroke-width="2.5"/></svg>`;
+
+function pickItem(item){
+  G.item=item;G.mode=null;G.pat=null;
+  document.getElementById('mode-preview').innerHTML=item==='tshirt'?TSVG:BSVG;
+  document.getElementById('mc0').classList.remove('sel');document.getElementById('mc1').classList.remove('sel');
+  document.getElementById('pat-sec').style.display='none';
+  document.getElementById('start-btn').disabled=true;
+  go('mode');
+}
+function pickMode(mode){
+  G.mode=mode;
+  document.getElementById('mc0').classList.toggle('sel',mode==='custom');
+  document.getElementById('mc1').classList.toggle('sel',mode==='trace');
+  if(mode==='trace'){
+    document.getElementById('pat-sec').style.display='flex';buildPatThumbs();G.pat=null;
+    document.getElementById('start-btn').disabled=true;
+  }else{
+    G.pat=null;document.getElementById('pat-sec').style.display='none';
+    document.getElementById('start-btn').disabled=false;
+  }
+}
+function buildPatThumbs(){
+  const row=document.getElementById('pat-row');row.innerHTML='';
+  PATS.forEach(p=>{
+    const d=document.createElement('div');d.className='p-thumb';
+    const mc=document.createElement('canvas');mc.width=52;mc.height=52;
+    const mx=mc.getContext('2d');mx.fillStyle='#fff';mx.fillRect(0,0,52,52);drawPat(mx,p.id,0,0,52,52,0.7);
+    const nm=document.createElement('div');nm.className='p-thumb-name';nm.textContent=p.name;
+    d.appendChild(mc);d.appendChild(nm);
+    d.onclick=()=>{G.pat=p.id;document.querySelectorAll('.p-thumb').forEach(t=>t.classList.remove('sel'));d.classList.add('sel');document.getElementById('start-btn').disabled=false;};
+    row.appendChild(d);
+  });
+}
+function startDraw(){
+  strokes=[];cur=null;G.era=false;bound=false;
+  document.getElementById('drw-title').textContent=(G.item==='tshirt'?'วาดลายเสื้อยืด':'วาดลายกระเป๋า')+' 🎨';
+  go('drawing');
+  requestAnimationFrame(()=>{setupCanvas();buildTools();bindCanvas();redraw();});
+}
+
+// ── FINISH ─────────────────────────────────────────────
+function finish(){
+  const rc=document.getElementById('result-canvas');
+  const pad=22;rc.width=IW+pad*2;rc.height=IH+pad*2;
+  const rx=rc.getContext('2d');
+  rx.fillStyle='#fff9f0';rx.fillRect(0,0,rc.width,rc.height);
+  rx.drawImage(CV,IX-pad,IY-pad,rc.width,rc.height,0,0,rc.width,rc.height);
+  // redraw outline on result
+  rx.save();strokeItem(rx,G.item,pad,pad,IW,IH,'#bbb',2);rx.restore();
+  go('result');
+}
+const FEAT_ACT=['ACT014_TH','ACT010_TH','ACT011_TH','ACT012_TH','ACT015_TH','ACT016_TH','ACT017_TH','ACT018_TH'];
+const FEAT_PRD=['PRD024_TH','PRD025_TH','PRD026_TH','PRD027_TH','PRD028_TH'];
+function goActivity(){window.parent.postMessage({action:'experience',featured:FEAT_ACT},'*');}
+function goShop(){window.parent.postMessage({action:'shop',featured:FEAT_PRD},'*');}
+</script>
+</body>
+</html>

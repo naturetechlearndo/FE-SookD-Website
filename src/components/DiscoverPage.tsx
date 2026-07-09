@@ -129,7 +129,18 @@ const DISCOVER_PLACES: PlaceData[] = [
           ],
         },
       },
-      { name: 'ผ้ามัดย้อมบางกะเจ้า', nameEn: 'Bang Kachao Tie-Dye', image: '/img/discover-tiedye.jpg' },
+      { name: 'ผ้ามัดย้อมบางกะเจ้า', nameEn: 'Bang Kachao Tie-Dye', image: '/img/discover-tiedye.jpg',
+        modal: {
+          subtitle: 'ต.บางกะเจ้า และ ต.บางกระสอบ อ.พระประแดง จ.สมุทรปราการ',
+          description: 'พื้นที่ร่องสวนและป่าชายเลนดั้งเดิมในคุ้งบางกะเจ้า ซึ่งเป็นแหล่งปลูกมะม่วงน้ำดอกไม้ที่มีชื่อเสียงและมีต้นจากขึ้นหนาแน่นตามริมน้ำ พื้นที่แห่งนี้เป็นพื้นที่ต้นแบบแห่งการอนุรักษ์พันธุกรรมพืชและสร้างมูลค่าเพิ่ม ผ่านงานคราฟต์ระดับพรีเมียม โดยชาวบ้านได้เปลี่ยน "เปลือกลูกจาก" ที่เคยเป็นขยะเหลือทิ้ง และ "ใบมะม่วงน้ำดอกไม้" ที่ต้องตัดแต่งกิ่ง มาสกัดเป็นสีธรรมชาติอันเป็นอัตลักษณ์เฉพาะถิ่น สร้างรายได้เสริมให้เกษตรกรและกลุ่มสตรีในชุมชน พร้อมทั้งสร้างข้อตกลงร่วมกันในการรักษาสวนผลไม้และป่าจากดั้งเดิมไว้ ไม่ให้ถูกแปรสภาพเป็นสิ่งปลูกสร้าง เพื่อส่งต่อระบบนิเวศที่สมบูรณ์ให้คนในท้องถิ่นยั่งยืน',
+          image: '/img/pamudyom.jpg',
+          exploreLabel: 'สำรวจผ้ามัดย้อมบางกะเจ้า',
+          exploreLink: 'https://www.google.com/maps/place/%E0%B8%A5%E0%B8%B9%E0%B8%81%E0%B8%88%E0%B8%B2%E0%B8%81+%E0%B8%9C%E0%B9%89%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%94%E0%B8%A2%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%AA%E0%B8%B5%E0%B8%98%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4/@13.683707,100.5594704,3a,75y,255.77h,74.46t/data=!3m7!1e1!3m5!1sX9NYeWMzQGQkwp6oecgcyQ!2e0!6shttps:%2F%2Fstreetviewpixels-pa.clients6.google.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D15.53959917074532%26panoid%3DX9NYeWMzQGQkwp6oecgcyQ%26yaw%3D255.76943433802157!7i16384!8i8192!4m15!1m8!3m7!1s0x30e2a1559efd530b:0xafef3cdd2768ad8e!2z4Lil4Li54LiB4LiI4Liy4LiBIOC4nOC5ieC4suC4oeC4seC4lOC4ouC5ieC4reC4oeC4quC4teC4mOC4o-C4o-C4oeC4iuC4suC4leC4tA!8m2!3d13.6837517!4d100.5592469!10e5!16s%2Fg%2F11qlwf98v1!3m5!1s0x30e2a1559efd530b:0xafef3cdd2768ad8e!8m2!3d13.6837517!4d100.5592469!16s%2Fg%2F11qlwf98v1?entry=ttu&g_ep=EgoyMDI2MDcwNi4wIKXMDSoASAFQAw%3D%3D',
+          subSections: [
+            { sectionHeader: 'กิจกรรม', title: 'Style Sketch', description: 'สัมผัสประสบการณการออกแบบลายที่มีแค่สำหรับคุณคนเดียว', image: '/img/pamudyomgame.jpg', experienceLabel: 'ร่วมกิจกรรม', gameLink: '/games/style-sketch.html' },
+          ],
+        },
+      },
     ],
   },
   {
@@ -214,6 +225,13 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
         if (ids.length) sessionStorage.setItem('featuredProducts', JSON.stringify(ids));
         setGameUrl(null);
         onNavigate?.('products');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (e.data?.action === 'experience') {
+        const ids: string[] = e.data.featured ?? [];
+        if (ids.length) sessionStorage.setItem('featuredActivities', JSON.stringify(ids));
+        setGameUrl(null);
+        onNavigate?.('experiences');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
