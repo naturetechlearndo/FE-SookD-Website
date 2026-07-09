@@ -2,8 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import "./ChatWidget.css";
 import { getSessionId } from "../../utils/session";
 
+interface ChatbotProps {
+    lang: "TH" | "ENG";
+}
 
-export default function ChatWidget() {
+
+export default function ChatWidget({
+    lang
+}: ChatbotProps) {
     const token = localStorage.getItem("token");
     type ChatMessage = {
         sender: "user" | "bot";
@@ -33,8 +39,7 @@ export default function ChatWidget() {
         return () => observer.disconnect();
 
     }, []);
-
-    const language = "en";
+    const language = lang === "ENG" ? "en" : "th";
     const TEXT = {
         th: {
             greeting: "สวัสดีจ้า มีอะไรให้ลุงช่วยไหมจ๊ะ 😊",
@@ -76,9 +81,13 @@ export default function ChatWidget() {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
     useEffect(() => {
-        console.log("useEffect run");
+        console.log("showAdmin =", showAdmin);
+    }, [showAdmin]);
+    useEffect(() => {
+        // console.log("useEffect run");
+        // console.log("language 11 =", language);
 
-        fetch("http://localhost:3000/chat/suggestions")
+        fetch(`http://localhost:3000/chat/suggestions?language=${language}`)
             .then(r => r.json())
             .then(data => {
                 // console.log("suggestion", data);
@@ -87,7 +96,7 @@ export default function ChatWidget() {
             .catch(err => {
                 console.error(err);
             });
-    }, []);
+    }, [language]);
 
     function triggerAdminButton() {
         setShowAdmin(true);
@@ -128,6 +137,15 @@ export default function ChatWidget() {
         }
 
     ]);
+
+    useEffect(() => {
+        setMessages([
+            {
+                sender: "bot",
+                text: TEXT[language].greeting
+            }
+        ]);
+    }, [language]);
 
 
     useEffect(() => {
@@ -186,6 +204,9 @@ export default function ChatWidget() {
         setLoading(true);
 
         try {
+            // console.log("sA ",showAdmin);
+
+            // console.log("language12 =", language);
 
             // console.log(localStorage.getItem("token"));
             const res = await fetch("http://localhost:3000/chat", {
@@ -196,12 +217,14 @@ export default function ChatWidget() {
                 },
                 body: JSON.stringify({
                     guestId: getSessionId(),
-                    message: userText
+                    message: userText,
+                    language: language
                 })
             });
 
             const data = await res.json();
             if (data.showAdmin) { triggerAdminButton(); }
+            // else{console.log(data);}
 
             // 2. add bot response
             setMessages(prev => [
@@ -219,7 +242,7 @@ export default function ChatWidget() {
 
                 setTimeout(() => {
                     setShowBuyLoading(false);
-                    console.log("dataLink:",data.link);
+                    console.log("dataLink:", data.link);
                     window.open(data.link, "_blank");
                 }, 3000);
             }
@@ -255,7 +278,7 @@ export default function ChatWidget() {
 
             {/* Contact Admin */}
 
-            {showAdmin && (
+            {/* {showAdmin && (
                 <button
                     className={`admin-btn
       ${adminAttention ? "attention" : ""}
@@ -267,7 +290,20 @@ export default function ChatWidget() {
 
                     {adminMinimized ? "💬" : `💬 ${TEXT[language].contact}`}
                 </button>
-            )}
+            )} */
+                <button
+                    className={`admin-btn
+        ${adminAttention ? "attention" : ""}
+        ${adminMinimized ? "small" : ""}
+        ${heroVisible ? "heroPart" : ""}
+    `}
+                    data-text={TEXT[language].contact}
+                    onClick={handleContactAdmin}
+                >
+                    💬
+                </button>
+            }
+
 
             {/* Floating Button */}
 
@@ -333,14 +369,14 @@ export default function ChatWidget() {
 
                             {msg.link && (
                                 <div className="suggestion-chip">
-                                <a
-                                    href={msg.link}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="buy-link"
-                                >
-                                    🛒 {TEXT[language].product}
-                                </a>
+                                    <a
+                                        href={msg.link}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="buy-link"
+                                    >
+                                        🛒 {TEXT[language].product}
+                                    </a>
                                 </div>
                             )}
                         </div>

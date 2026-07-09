@@ -126,7 +126,7 @@ export default function App() {
       <style>{CART_CSS}</style>
       <style>{CHECKOUT_CSS}</style>
       <style>{DISCOVER_CSS}</style>
-      <ChatWidget />
+      <ChatWidget lang={lang} />
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
         currentUser={currentUser}

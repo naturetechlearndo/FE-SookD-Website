@@ -7,7 +7,7 @@ let lastUpdate = 0;
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
 
-const language ="en";
+// const language ="en";
 
 // ================= Get FAQ =================
 
@@ -29,7 +29,7 @@ export async function getFAQ(language = "th") {
 }
 
 //==============suggestion=====================
-export async function getSuggestions() {
+export async function getSuggestions(language="th") {
 
     const faqs = await getFAQ(language);
 
@@ -41,7 +41,7 @@ export async function getSuggestions() {
 }
 
 // ================= Create FAQ Fuse =================
-export async function createFAQFuse() {
+export async function createFAQFuse(language = "th") {
 
     const now = Date.now();
 

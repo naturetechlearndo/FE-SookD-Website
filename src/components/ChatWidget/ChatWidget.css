@@ -393,7 +393,7 @@
 }
 
 .admin-btn.small:hover::after {
-    content: " ติดต่อทีมงาน";
+    content: attr(data-text);
 }
 
 .admin-btn.attention {

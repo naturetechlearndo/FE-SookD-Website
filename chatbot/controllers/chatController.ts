@@ -9,63 +9,46 @@ import { getSessionId } from "../../src/utils/session";
 import { normalizeQuestion, adjustScore } from "../utils/normalizeQuestion.mjs";
 import { getSearchData } from "../services/searchDataService.mjs";
 
-import { createFAQFuse, getSuggestions, searchFAQ } from "../services/faqService.mjs";
+import { createFAQFuse, getFAQ, getSuggestions, searchFAQ } from "../services/faqService.mjs";
 import { AuthRequest } from "../../backend/middlewares/authMiddleware";
 import { createAdminChat } from "../services/adminService";
-
-const faqFuse = await createFAQFuse();
-
-// const language = request.body.language || "th";
-const language = "en";
-
-// let oldResult = []; session.lastSearchResults
-
-//==========find by intent=========//
-// const {
-//     productSearchData,
-//     activitySearchData
-//     // ,placeSearchData 
-// } = await getSearchData();
-// const productFuse = createFuse(productSearchData);
-
-// const activityFuse = createFuse(activitySearchData);
-
-// // const placeFuse = createFuse(placeSearchData);
-
-// const allFuse = createFuse([
-//     ...productSearchData,
-//     ...activitySearchData
-//     // ,...placeSearchData
-// ]);
 
 const {
     productSearchData,
     activitySearchData
 } = await getSearchData();
 
-const langSuffix = "_" + language.toUpperCase();
+const productTH = productSearchData.filter(item =>
+    item.raw.id.endsWith("_TH")
+);
 
-const filteredProductSearchData =
-    productSearchData.filter(item =>
-        item.raw.id.endsWith(langSuffix)
-    );
+const productEN = productSearchData.filter(item =>
+    item.raw.id.endsWith("_EN")
+);
 
-const filteredActivitySearchData =
-    activitySearchData.filter(item =>
-        item.raw.id.endsWith(langSuffix)
-    );
+const activityTH = activitySearchData.filter(item =>
+    item.raw.id.endsWith("_TH")
+);
 
-const productFuse =
-    createFuse(filteredProductSearchData);
+const activityEN = activitySearchData.filter(item =>
+    item.raw.id.endsWith("_EN")
+);
 
-const activityFuse =
-    createFuse(filteredActivitySearchData);
+const productFuseTH = createFuse(productTH);
+const productFuseEN = createFuse(productEN);
 
-const allFuse = createFuse([
-    ...filteredProductSearchData,
-    ...filteredActivitySearchData
+const activityFuseTH = createFuse(activityTH);
+const activityFuseEN = createFuse(activityEN);
+
+const allFuseTH = createFuse([
+    ...productTH,
+    ...activityTH
 ]);
-//=========================================//
+
+const allFuseEN = createFuse([
+    ...productEN,
+    ...activityEN
+]);
 
 export async function chatController(
     req: AuthRequest,
@@ -76,6 +59,13 @@ export async function chatController(
     const session = getSession(sessionId);
 
     const count = updateQuestionCount(sessionId);
+    const language = req.body.language === "en" ? "en" : "th";
+
+    const productFuse = language === "en" ? productFuseEN : productFuseTH;
+
+    const activityFuse = language === "en" ? activityFuseEN : activityFuseTH;
+
+    const allFuse = language === "en" ? allFuseEN : allFuseTH;
 
     //=============== check limit ========//
     if (!checkRateLimit(sessionId)) {
@@ -121,12 +111,6 @@ export async function chatController(
 
                 fuse = activityFuse;
                 break;
-
-
-            // case "place":
-
-            //     fuse = placeFuse;
-            //     break;
 
 
             default:
@@ -205,6 +189,9 @@ export async function chatController(
 
 
         //=========FAQ=========//
+        console.log("lang",language);
+        const faqFuse = await createFAQFuse(language);
+
         const faqAnswer =
             searchFAQ(
                 faqFuse,
@@ -273,10 +260,6 @@ export async function chatController(
                 language
             );
 
-        // console.log("prompt",prompt);
-
-
-
         //=============== Gemini ============//
 
         let answer = await askGemini(prompt);
@@ -301,96 +284,97 @@ export async function chatController(
             });
         }
 
-            const selected = result[ai.selected - 1];
+        const selected = result[ai.selected - 1];
 
-            updateHistory(
-                sessionId,
-                question,
-                answer
-            );
+        updateHistory(
+            sessionId,
+            question,
+            answer
+        );
 
-            //==============Session Set==========//
+        //==============Session Set==========//
 
-            sessionSet(sessionId, selected.item);
+        sessionSet(sessionId, selected.item);
 
-            console.log("session keep:",getSession(sessionId).lastResults);
+        console.log("session keep:", getSession(sessionId).lastResults);
 
-            return res.json({
-                answer: ai.answer,
-                link: selected?.item?.raw?.link,
-                showAdmin: session.questionCount >= 5
-            });
+        return res.json({
+            answer: ai.answer,
+            link: selected?.item?.raw?.link,
+            showAdmin: session.questionCount >= 5
+        });
 
-        } catch (err) {
+    } catch (err) {
 
-            console.error(err);
+        console.error(err);
 
-            return res.status(500).json({
-                answer:
+        return res.status(500).json({
+            answer:
                 language === "en"
-                        ? "Uncle is a little busy right now. Could you please ask again in a moment?"
-                        : "ลุงยุ่งนิดหน่อย ลองถามใหม่อีกทีนะหลานๆ",
-                error: true,
-                showAdmin: session.questionCount >= 5
-            });
-        }
-
+                    ? "Uncle is a little busy right now. Could you please ask again in a moment?"
+                    : "ลุงยุ่งนิดหน่อย ลองถามใหม่อีกทีนะหลานๆ",
+            error: true,
+            showAdmin: session.questionCount >= 5
+        });
     }
+
+}
 
 
 export async function getSuggestionController(
-        req: AuthRequest,
-        res: Response
-    ) {
-        try {
-            const suggestions = await getSuggestions();
+    req: AuthRequest,
+    res: Response
+) {
+    const language =  req.query.language === "en" ? "en" : "th";
+    try {
+        const suggestions = await getSuggestions(language);
 
-            res.json(suggestions);
-        }
-        catch (err) {
-            console.error(err);
+        res.json(suggestions);
+    }
+    catch (err) {
+        console.error(err);
 
-            return res.status(500).json({
-                success: false
-            });
-        }
-
+        return res.status(500).json({
+            success: false
+        });
     }
 
+}
 
-    export async function contactAdmin(
-        req: AuthRequest,
-        res: Response
-    ) {
-        try {
-            const sessionId = req.user?.user_id || req.body.guestId;
 
-            const session = getSession(sessionId);
-            console.log("USER", req.user);
-            console.log("session", session);
-            const history = session.history
-                .map(chat =>
-                    `👤 ลูกค้า: ${chat.question}\n🤖 ลุง: ${chat.answer}`
-                )
-                .join("\n\n");
+export async function contactAdmin(
+    req: AuthRequest,
+    res: Response
+) {
+    try {
+        const sessionId = req.user?.user_id || req.body.guestId;
 
-            const adminChat = await createAdminChat({
-                session_id: sessionId,
-                history,
-                status: "waiting",
-                created_at: new Date().toISOString()
-            });
+        const session = getSession(sessionId);
+        console.log("USER", req.user);
+        console.log("session", session);
+        const history = session.history
+            .map(chat =>
+                `👤 ลูกค้า: ${chat.question}\n🤖 ลุง: ${chat.answer}`
+            )
+            .join("\n\n");
 
-            return res.json({
-                success: true,
-                reference: adminChat.reference_id
-            });
+        const adminChat = await createAdminChat({
+            session_id: sessionId,
+            history,
+            status: "waiting",
+            created_at: new Date().toISOString()
+        });
 
-        } catch (err) {
-            console.error(err);
+        return res.json({
+            success: true,
+            reference: adminChat.reference_id
+        });
 
-            return res.status(500).json({
-                success: false
-            });
-        }
+    } catch (err) {
+        console.error(err);
+
+        return res.status(500).json({
+            success: false
+        });
     }
+}
