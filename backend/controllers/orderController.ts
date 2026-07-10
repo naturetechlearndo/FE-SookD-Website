@@ -149,3 +149,17 @@ export async function deleteOrder(
         });
     }
 }
+
+export async function getImpactData(
+    req: Request,
+    res: Response) {
+     try {
+        const Impact =
+            await orderService.getImpactData();
+        res.status(200).json(Impact);
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to get Impact"
+        });
+    }
+}

@@ -3,10 +3,10 @@ import type { SiteContent } from '../types';
 export const SITE_CONTENT: SiteContent = {
   navLinks: [
     { label: 'Experiences', href: '#experiences', page: 'experiences' },
-    { label: 'Product',     href: '#products',    page: 'products' },
-    { label: 'Discover',    href: '#discover',   page: 'discover' },
-    { label: 'Membership',  href: '#membership', page: 'membership' },
-    { label: 'About',       href: '#about',       page: 'about' },
+    { label: 'Product', href: '#products', page: 'products' },
+    { label: 'Discover', href: '#discover', page: 'discover' },
+    { label: 'Membership', href: '#membership', page: 'membership' },
+    { label: 'About', href: '#about', page: 'about' },
   ],
 
   experiences: {
@@ -98,37 +98,51 @@ export const SITE_CONTENT: SiteContent = {
   journey: {
     heading: 'Start your Journey',
     cards: [
-      { id: 'taste',    title: 'Taste',    href: '#taste',    page: 'products' },
+      { id: 'taste', title: 'Taste', href: '#taste', page: 'products' },
       { id: 'activity', title: 'Activity', href: '#activity', page: 'experiences' },
-      { id: 'travel',   title: 'Travel',   href: '#travel' },
+      { id: 'travel', title: 'Travel', href: '#travel' },
     ],
   },
 
   natureQuote: {
     heading: 'The best stories begin in nature',
-    subtext:  'เรื่องราวที่ดีที่สุด เริ่มต้นจากธรรมชาติ',
+    subtext: 'เรื่องราวที่ดีที่สุด เริ่มต้นจากธรรมชาติ',
   },
 
   pursuit: {
-    heading:  'Pursuit of Feeling',
-    body:     "Travel has always been about more than just going 'somewhere else'. For us, travel – breathless and beautiful – is about feeling somewhere else",
+    heading: 'Pursuit of Feeling',
+    body: "Travel has always been about more than just going 'somewhere else'. For us, travel – breathless and beautiful – is about feeling somewhere else",
     ctaLabel: 'Discover more',
-    ctaHref:  '#pursuit',
+    ctaHref: '#pursuit',
   },
 
   luxury: {
     heading: 'Our guide to luxury travel',
-    body:    'We create bespoke luxury holidays for people who want more than just beautiful places.',
+    body: 'We create bespoke luxury holidays for people who want more than just beautiful places.',
   },
 
   socialImpact: {
-    heading:    'Social Impact',
+    heading: 'Social Impact',
     subheading: 'ผลลัพธ์จากการขับเคลื่อนและร่วมมือกับชุมชนตลอดปี 2025–2026 เพื่อสร้างความยั่งยืนในทุกมิติ',
     stats: [
-      { id: 's1', value: '44%',  label: 'ลดการปล่อยก๊าซเรือนกระจก' },
-      { id: 's2', value: '10K',  label: 'ต้นไม้ที่ฟื้นฟู (ต้น)' },
-      { id: 's3', value: '300',  label: 'ลดขยะอินทรีย์ (ตัน)' },
-      { id: 's4', value: '500k', label: 'สร้างรายได้ให้ชุมชน (บาท)' },
+      {
+        id: "s1",
+        value: "การศึกษา\nสิ่งแวดล้อม\nระบบสาธารณะสุข",
+        label: "สนับสนุนชุมชนในหลายด้าน",
+        description: "รายจากการขายสินค้าและกิจกรรมจะถูกนำไปสนับสนุนชุมชนในด้านต่างๆ"
+      },
+      {
+        id: "s2",
+        value: "0",
+        label: "ให้ความรู้และสร้างอาชีพให้กับคนในชุมชน(คน)",
+        description: "คำนวณจากยอดขายสะสมของเว็บไซต์"
+      },
+      {
+        id: "s3",
+        value: "0",
+        label: "สร้างรายได้ให้คนในชุมชน(บาท)",
+        description: "จำนวนรายได้ที่สร้างให้กับคนในชุมชน"
+      }
     ],
   },
 
@@ -143,10 +157,10 @@ export const SITE_CONTENT: SiteContent = {
     },
     contact: {
       items: [
-        { icon: 'phone',    label: '+66925054994',             href: 'tel:+66925054994' },
-        { icon: 'email',    label: 'info.learndo@gmail.com',   href: 'mailto:info.learndo@gmail.com' },
+        { icon: 'phone', label: '+66925054994', href: 'tel:+66925054994' },
+        { icon: 'email', label: 'info.learndo@gmail.com', href: 'mailto:info.learndo@gmail.com' },
         { icon: 'facebook', label: 'facebook.com/LearnDoClub', href: 'https://www.facebook.com/LearnDoClub' },
-        { icon: 'line',     label: '@learndo',                 href: 'https://line.me/R/ti/p/@learndo' },
+        { icon: 'line', label: '@learndo', href: 'https://line.me/R/ti/p/@learndo' },
       ],
     },
     copyright: 'Copyright © 2026 – VANA. All rights reserved.',

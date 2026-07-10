@@ -40,6 +40,7 @@ export interface ImpactStat {
   id: string;
   value: string;
   label: string;
+  description: string;
 }
 
 export interface ContactItem {

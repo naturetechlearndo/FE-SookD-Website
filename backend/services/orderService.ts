@@ -149,3 +149,29 @@ export async function getOrdersByUserId(
         order => order.user_id === userId
     );
 }
+
+//===========================//
+export async function getImpactData() {
+
+    const orders = await getOrders();
+
+    const completedOrders = orders.filter(
+        o => o.order_status === "completed"
+    );
+
+    // console.log(completedOrders);
+
+    const sum_profits = completedOrders.reduce(
+        (sum, order) => sum + Number(order.total_price),
+        0
+    );
+
+    const job_count = Math.floor((sum_profits * 0.1) / 1000);
+
+    // console.log(job_count);
+
+    return {
+        job_count,
+        sum_profits
+    };
+}

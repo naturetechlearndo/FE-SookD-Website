@@ -52,7 +52,7 @@ export default function App() {
     setSelectedProductId(id => id.endsWith(oldSuffix) ? id.slice(0, -oldSuffix.length) + newSuffix : id);
   }, [lang]);
 
- useEffect(() => {
+  useEffect(() => {
     // ============= sessionCheck ========//
     getSessionId();
     // ================================= //
@@ -571,6 +571,48 @@ address{font-style:normal}
 .impact__label {
   font-size:.85rem; color:var(--forest);
   font-family:var(--font-th); text-align:center; line-height:1.4;
+}
+
+.impact__value.small {
+white-space: pre-line;
+  font-size:1.2rem;
+}
+
+.impact__card.small {
+  padding:2.5rem 2rem 1.5rem;
+}
+
+.impact__tooltip{
+    position:absolute;
+
+    bottom:110%;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:220px;
+
+    background:#ffffff;
+    color:#40916c;
+
+    padding:10px 12px;
+
+    border-radius:8px;
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:.2s;
+    font-size:13px;
+
+    z-index:100;
+}
+
+.impact__card:hover .impact__tooltip{
+
+    opacity:1;
+    visibility:visible;
+
 }
 
 /* ── Footer ──────────────────────────────────────────────────── */

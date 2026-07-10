@@ -1,6 +1,11 @@
 const BASE_URL = 'http://localhost:3000/api';
 const _cache = new Map<string, any>();
 
+export interface Impact {
+    job_count: number;
+    sum_profits: number;
+}
+
 async function get<T>(path: string): Promise<T> {
   if (_cache.has(path)) return _cache.get(path) as T;
   const res = await fetch(`${BASE_URL}${path}`);
@@ -86,6 +91,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       }).then(r => r.json()),
+    getImpact: () => get<Impact>('/orders/impact'),
   },
   promotions: {
     getAll: () => get<any[]>('/promotions'),
