@@ -308,9 +308,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     <>
                       <div className="ud-member-card">
                         <img
-                          src={`/img/${tierInfo.tier.toLowerCase()}-card.png`}
+                          src={
+                            tierInfo.tier === 'Silver' ? '/img/silver-removebg-preview.png'
+                            : tierInfo.tier === 'Gold' ? '/img/gold-removebg-preview.png'
+                            : tierInfo.tier === 'Legend' ? '/img/legend-removebg-preview.png'
+                            : '/img/sookd card.png'
+                          }
                           alt={tierInfo.tier}
-                          onError={e => { (e.currentTarget as HTMLImageElement).src = '/img/sookd card.png'; }}
                         />
                       </div>
 
