@@ -32,7 +32,9 @@ export default function App() {
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [prevPage, setPrevPage] = useState<Page>('experiences');
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    try { const s = localStorage.getItem('sookd_user'); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
   const [orderData, setOrderData] = useState<any>(null);
   const [lang, setLang] = useState<'TH' | 'ENG'>('TH');
   const [cartCount, setCartCount] = useState(0);
@@ -62,7 +64,14 @@ export default function App() {
       if (existingState.activityId) setSelectedActivityId(existingState.activityId);
       if (existingState.productId) setSelectedProductId(existingState.productId);
       if (existingState.prevPage) setPrevPage(existingState.prevPage as Page);
-      setPage(existingState.page as Page);
+      const restoredPage = existingState.page as Page;
+      const needsAuth = ['profile', 'checkout'].includes(restoredPage);
+      const savedUser = (() => { try { const s = localStorage.getItem('sookd_user'); return s ? JSON.parse(s) : null; } catch { return null; } })();
+      if (needsAuth && !savedUser) {
+        window.history.replaceState({ page: 'home' }, '');
+      } else {
+        setPage(restoredPage);
+      }
     } else {
       window.history.replaceState({ page: 'home' }, '');
     }
@@ -132,18 +141,18 @@ export default function App() {
       <Navbar
         links={c.navLinks} onNavigate={navigate} currentPage={page} lightTop={page !== 'home'}
         currentUser={currentUser}
-        onLogout={() => { setCurrentUser(null); navigate('home'); }}
+        onLogout={() => { localStorage.removeItem('sookd_user'); setCurrentUser(null); navigate('home'); }}
         lang={lang} onLangChange={setLang}
         cartCount={cartCount}
       />
 
       {page === 'profile' ? (
-        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => setCurrentUser(u)}
+        <UserDashboard user={currentUser} onNavigate={navigate} onUserUpdate={(u) => { localStorage.setItem('sookd_user', JSON.stringify(u)); setCurrentUser(u); }}
           onSelectProduct={openProductFromOrder} onSelectActivity={openActivityFromOrder} lang={lang} />
       ) : page === 'login' ? (
         <AuthPage
           onBack={() => navigate('home')}
-          onLoginSuccess={(user) => { setCurrentUser(user); navigate('home'); }}
+          onLoginSuccess={(user) => { localStorage.setItem('sookd_user', JSON.stringify(user)); setCurrentUser(user); navigate('home'); }}
           lang={lang}
         />
       ) : page === 'product-detail' ? (

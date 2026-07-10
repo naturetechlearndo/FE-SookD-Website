@@ -13,6 +13,7 @@ interface Props {
   onNavigateToCart?: () => void;
   optionalIds?: string[];
   offerIds?: string[];
+  simple?: boolean;
   lang?: 'TH' | 'ENG';
 }
 
@@ -92,7 +93,7 @@ function Calendar({ selected, onSelect, error }: { selected: Date | null; onSele
   );
 }
 
-export default function BookingModal({ activity, currentUser: _currentUser, onClose, onNavigateToCart, optionalIds = DEFAULT_OPTIONAL_IDS, offerIds = DEFAULT_OFFER_IDS, lang = 'TH' }: Props) {
+export default function BookingModal({ activity, currentUser: _currentUser, onClose, onNavigateToCart, optionalIds = DEFAULT_OPTIONAL_IDS, offerIds = DEFAULT_OFFER_IDS, simple = false, lang = 'TH' }: Props) {
   const isTH = lang === 'TH';
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [participants, setParticipants] = useState(1);
@@ -257,7 +258,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
         </div>
 
         {/* ── Optional activities ── */}
-        <div className="bk__optional">
+        {!simple && <div className="bk__optional">
           <div className="bk__opt-title-row">
             <h4 className="bk__opt-title">{isTH ? 'กิจกรรม (เลือกเพิ่มได้)' : 'Activity (Optional)'}</h4>
             {showDateError && !selectedDate && (
@@ -354,7 +355,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
               );
             })}
           </div>
-        </div>
+        </div>}
 
         {/* ── Footer ── */}
         <div className="bk__footer">
@@ -365,18 +366,33 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </button>
+            {simple && showDateError && !selectedDate && (
+              <span className="bk__date-error">กรุณาเลือกวันเข้าร่วมกิจกรรม</span>
+            )}
             <div className="bk__total">
               Total&nbsp;&nbsp;:&nbsp;&nbsp;<strong>{total.toLocaleString()}</strong>&nbsp;Baht
             </div>
-            <button className="bk__next-btn" onClick={() => {
-              if (!selectedDate) {
-                setShowDateError(true);
-                modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-              }
-              setShowDateError(false);
-              setStep(2);
-            }}>{isTH ? 'ถัดไป' : 'Next'}</button>
+            {simple ? (
+              <button className="bk__next-btn" onClick={() => {
+                if (!selectedDate) {
+                  setShowDateError(true);
+                  modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                setShowDateError(false);
+                handleAddToCart();
+              }}>{isTH ? 'เพิ่มในตะกร้าสินค้า' : 'Add to Cart'}</button>
+            ) : (
+              <button className="bk__next-btn" onClick={() => {
+                if (!selectedDate) {
+                  setShowDateError(true);
+                  modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                setShowDateError(false);
+                setStep(2);
+              }}>{isTH ? 'ถัดไป' : 'Next'}</button>
+            )}
           </div>
         </div>
         </>)}

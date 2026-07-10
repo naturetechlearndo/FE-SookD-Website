@@ -17,21 +17,41 @@ function driveThumb(url: string, size = 'w400'): string {
   return url || '';
 }
 
+function getTierDiscount(points: number): { tier: string; pct: number } {
+  if (points >= 1000) return { tier: 'Legend', pct: 0.20 };
+  if (points >= 500)  return { tier: 'Gold',   pct: 0.10 };
+  if (points >= 200)  return { tier: 'Silver',  pct: 0.05 };
+  return                     { tier: 'Nature',  pct: 0 };
+}
+
 export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: Props) {
   const isTH = lang === 'TH';
   const [items, setItems] = useState<CartItem[]>([]);
   const [placing, setPlacing] = useState(false);
   const [orderErr, setOrderErr] = useState('');
+  const [userPoints, setUserPoints] = useState(0);
 
   useEffect(() => {
     const all = getCart();
     setItems(all.filter(i => i.checked));
   }, []);
 
+  useEffect(() => {
+    if (!currentUser?.user_id) return;
+    api.orders.getByUserId(currentUser.user_id)
+      .then((orders: any[]) => {
+        const pts = orders
+          .filter((o: any) => o.order_status === 'completed')
+          .reduce((s: number, o: any) => s + Math.floor(Number(o.total_price || 0) / 100), 0);
+        setUserPoints(pts);
+      })
+      .catch(() => {});
+  }, [currentUser?.user_id]);
+
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const shippingFee = 0;
-  const discount = 0;
-  const totalAmount = subtotal + shippingFee - discount;
+  const { tier: memberTier, pct: discountPct } = getTierDiscount(userPoints);
+  const discount = Math.floor(subtotal * discountPct);
+  const totalAmount = subtotal - discount;
 
   const grouped = new Map<string, CartItem[]>();
   items.forEach(item => {
@@ -52,7 +72,7 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
             order_date: new Date().toISOString().split('T')[0],
             item_id: item.itemId,
             quantity: item.qty,
-            total_price: item.price * item.qty,
+            total_price: Math.round(item.price * item.qty * (1 - discountPct)),
             order_status: item.itemType === 'activity' ? 'completed' : 'processing',
             shipping_address: currentUser?.address || '',
             act_date: item.actDate || '',
@@ -179,12 +199,17 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
               <span>{subtotal.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
             </div>
             <div className="co__summary-row">
-              <span>{isTH ? 'ค่าจัดส่ง' : 'Shipping Fee'}</span>
-              <span>{shippingFee} {isTH ? 'บาท' : 'Baht'}</span>
-            </div>
-            <div className="co__summary-row">
-              <span>{isTH ? 'ส่วนลด' : 'Discount'}</span>
-              <span>{discount} {isTH ? 'บาท' : 'Baht'}</span>
+              <span>
+                {isTH ? 'ส่วนลด' : 'Discount'}
+                {discountPct > 0 && (
+                  <span style={{ marginLeft: '0.4rem', fontSize: '.75rem', color: '#2d6a4f', fontWeight: 600 }}>
+                    ({memberTier} {Math.round(discountPct * 100)}%)
+                  </span>
+                )}
+              </span>
+              <span style={{ color: discountPct > 0 ? '#c0392b' : undefined }}>
+                {discountPct > 0 ? '-' : ''}{discount.toLocaleString()} {isTH ? 'บาท' : 'Baht'}
+              </span>
             </div>
             <div className="co__divider co__divider--thin" />
             <div className="co__summary-row co__summary-row--total">

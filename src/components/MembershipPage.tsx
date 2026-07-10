@@ -56,17 +56,19 @@ const TIERS = [
 ];
 
 const RULES_TH = [
-  'บัญชีนึงคูณหลายบัญชีไม่สามารถสะสม SookD Point ได้',
-  'ทุกการใช้จ่าย 10 บาท รับ 1 SookD Point',
-  'SookD Point จะคำนวณจากยอดใช้จ่ายหลังหักส่วนลด',
-  'SookD Point ไม่สามารถแลกเปลี่ยนหรือถอนคืนเป็นเงินสดได้',
+  'บัญชีนิติบุคคลไม่สามารถสะสม SookD Point ได้',
+  'ทุกการใช้จ่าย 100 บาท รับ 1 SookD Point',
+  'SookD Point จะคำนวณจากยอดใช้จ่ายสุทธิหลังหักส่วนลด',
+  'SookD Point ไม่สามารถแลกเปลี่ยนหรือทอนเป็นเงินสดได้',
+  'บริษัทขอสงวนสิทธิ์ในการเปลี่ยนแปลงเงื่อนไขและสิทธิประโยชน์ โดยไม่ต้องแจ้งให้ทราบล่วงหน้า',
 ];
 
 const RULES_EN = [
-  'One account per person — multiple accounts cannot accumulate SookD Points.',
-  'Every 10 THB spent earns 1 SookD Point.',
-  'SookD Points are calculated from the amount paid after discounts.',
+  'Corporate accounts are not eligible to accumulate SookD Points.',
+  'Every 100 THB spent earns 1 SookD Point.',
+  'SookD Points are calculated from the net amount paid after discounts.',
   'SookD Points cannot be exchanged for or redeemed as cash.',
+  'The company reserves the right to change conditions and benefits without prior notice.',
 ];
 
 export default function MembershipPage({ lang = 'TH' }: MembershipPageProps) {
@@ -133,7 +135,7 @@ export default function MembershipPage({ lang = 'TH' }: MembershipPageProps) {
         {/* ── Rules ── */}
         <div className="mem-rules">
           <h3 className="mem-rules-title">
-            {isTH ? 'ข้อกำหนดการสะสมแนะนำ:' : 'Point Accumulation Rules:'}
+            {isTH ? 'ข้อกำหนดการสะสมคะแนน' : 'Point Accumulation Rules'}
           </h3>
           <ol className="mem-rules-list">
             {(isTH ? RULES_TH : RULES_EN).map((r, i) => (

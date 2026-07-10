@@ -11,9 +11,10 @@ const BOOKING_ACTIVITY_IDS = [
   'ACT005_B2C', 'ACT006_B2C',
   'ACT007_B2C', 'ACT008', 'ACT009',
   'ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018',
+  'ACT019',
 ];
 
-const BOOKING_CONFIG: Record<string, { optionalIds: string[]; offerIds: string[] }> = {
+const BOOKING_CONFIG: Record<string, { optionalIds: string[]; offerIds: string[]; simple?: boolean }> = {
   default: {
     optionalIds: ['ACT014', 'ACT015', 'ACT016', 'ACT017', 'ACT018'],
     offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
@@ -73,6 +74,11 @@ const BOOKING_CONFIG: Record<string, { optionalIds: string[]; offerIds: string[]
   ACT018: {
     optionalIds: ['ACT010', 'ACT011', 'ACT012'],
     offerIds: ['PRD019','PRD020','PRD021','PRD022','PRD024','PRD025','PRD026','PRD027','PRD028'],
+  },
+  ACT019: {
+    optionalIds: [],
+    offerIds: [],
+    simple: true,
   },
 };
 
@@ -150,18 +156,23 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
   );
   const isLoggedIn = !!currentUser;
 
+  useEffect(() => { window.scrollTo(0, 0); }, [activityId]);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const effectiveId = /_(TH|EN)$/.test(activityId)
+      ? activityId.replace(/_(TH|EN)$/, lang === 'TH' ? '_TH' : '_EN')
+      : activityId;
+    setLoading(true);
     Promise.all([
-      api.activities.getOne(activityId),
-      api.reviews.getByItemId(activityId).catch(() => []),
-      api.reviews.getAvgByItemId(activityId).catch(() => ({ average: 0 })),
+      api.activities.getOne(effectiveId),
+      api.reviews.getByItemId(effectiveId).catch(() => []),
+      api.reviews.getAvgByItemId(effectiveId).catch(() => ({ average: 0 })),
     ]).then(([act, revs, avg]) => {
       setActivity(act);
       setReviews(Array.isArray(revs) ? revs : []);
       setAvgRating(Number(avg?.averageRating ?? avg?.average ?? avg?.avg ?? 0));
     }).finally(() => setLoading(false));
-  }, [activityId]);
+  }, [activityId, lang]);
 
   if (loading) return <div className="adet__loading">กำลังโหลด...</div>;
   if (!activity) return <div className="adet__loading">ไม่พบกิจกรรม</div>;
@@ -409,6 +420,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
           onNavigateToCart={() => onNavigate?.('cart')}
           optionalIds={(BOOKING_CONFIG[normalizeId(activity?.id ?? '')] ?? BOOKING_CONFIG.default).optionalIds.map(id => id + (lang === 'TH' ? '_TH' : '_EN'))}
           offerIds={(BOOKING_CONFIG[normalizeId(activity?.id ?? '')] ?? BOOKING_CONFIG.default).offerIds.map(id => id + (lang === 'TH' ? '_TH' : '_EN'))}
+          simple={!!(BOOKING_CONFIG[normalizeId(activity?.id ?? '')] ?? BOOKING_CONFIG.default).simple}
           lang={lang}
         />
       )}
