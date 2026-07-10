@@ -175,7 +175,7 @@ export default function App() {
         <CartPage currentUser={currentUser} onNavigate={navigate} lang={lang} />
       ) : (
         <main>
-          <Hero heading={c.hero.heading} subheading={c.hero.subheading} />
+          <Hero heading={c.hero[lang].heading} subheading={c.hero[lang].subheading} />
 
           {/* ── Section gap ── */}
           <div className="section-gap" />
@@ -184,22 +184,22 @@ export default function App() {
 
           <NatureQuote heading={c.natureQuote.heading} subtext={c.natureQuote.subtext} />
           <PursuitFeeling
-            heading={c.pursuit.heading}
-            body={c.pursuit.body}
-            ctaLabel={c.pursuit.ctaLabel}
-            ctaHref={c.pursuit.ctaHref}
+            heading={c.pursuit[lang].heading}
+            body={c.pursuit[lang].body}
+            ctaLabel={c.pursuit[lang].ctaLabel}
+            ctaHref={c.pursuit[lang].ctaHref}
           />
           {/* Pursuit → Luxury ไม่มี gap เพราะ Luxury image อยู่ซ้าย ต่อเนื่องกัน */}
-          <LuxuryTravel heading={c.luxury.heading} body={c.luxury.body} />
+          <LuxuryTravel heading={c.luxury[lang].heading} body={c.luxury[lang].body} />
           <div className="section-gap" />
 
           <SocialImpact
-            heading={c.socialImpact.heading}
-            subheading={c.socialImpact.subheading}
-            stats={c.socialImpact.stats}
+            heading={c.socialImpact[lang].heading}
+            subheading={c.socialImpact[lang].subheading}
+            stats={c.socialImpact[lang].stats}
           />
           <div className="section-gap" />
-          <Footer data={c.footer} />
+          <Footer data={c.footer[lang]} />
 
         </main>
       )}

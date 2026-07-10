@@ -246,7 +246,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           </p>
         </div>
       </div>
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 
@@ -335,7 +335,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           </p>
         </div>
       </div>
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 
@@ -407,7 +407,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           </p>
         </div>
       </div>
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }

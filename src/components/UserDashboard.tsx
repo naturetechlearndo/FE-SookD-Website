@@ -835,7 +835,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         </div>
       )}
 
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }

@@ -395,7 +395,7 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
         )}
       </div>
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
 
       {showLoginModal && (
         <div className="adet__modal-overlay" onClick={() => setShowLoginModal(false)}>

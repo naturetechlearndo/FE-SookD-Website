@@ -91,8 +91,14 @@ export const SITE_CONTENT: SiteContent = {
   },
 
   hero: {
-    heading: 'SookD',
-    subheading: 'ท่องเที่ยวและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้',
+    TH: {
+      heading: 'SookD',
+      subheading: 'ท่องเที่ยวและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้',
+    },
+    ENG: {
+      heading: 'SookD',
+      subheading: 'Travel and become part of a more sustainable world.',
+    }
   },
 
   journey: {
@@ -103,66 +109,148 @@ export const SITE_CONTENT: SiteContent = {
       { id: 'travel', title: 'Travel', href: '#travel' },
     ],
   },
-
+  // ====================================================//
   natureQuote: {
     heading: 'The best stories begin in nature',
     subtext: 'เรื่องราวที่ดีที่สุด เริ่มต้นจากธรรมชาติ',
   },
 
   pursuit: {
-    heading: 'Pursuit of Feeling',
-    body: "Travel has always been about more than just going 'somewhere else'. For us, travel – breathless and beautiful – is about feeling somewhere else",
-    ctaLabel: 'Discover more',
-    ctaHref: '#pursuit',
+    TH: {
+      heading: 'เปิดประสบการณ์',
+      body: "สำรวจจุดหมายที่เชื่อมโยงธรรมชาติ วัฒนธรรม และชุมชนเข้าด้วยกัน ไม่ว่าจะเป็นบางกะเจ้า นครปฐม บ้านคีรีวง หรือมูลนิธิกระต่ายในดวงจันทร์ ทุกการเดินทางคือโอกาสในการค้นพบประสบการณ์ใหม่ เรียนรู้เรื่องราวของท้องถิ่น และร่วมสร้างผลกระทบเชิงบวกต่อชุมชนและสิ่งแวดล้อม",
+      ctaLabel: 'สำรวจเพิ่มเติม',
+      ctaHref: '#pursuit',
+    },
+    ENG: {
+      heading: 'Discover Our Destinations',
+      body: "Explore destinations where nature, culture, and communities come together. Whether cycling through Bang Kachao, experiencing the heritage of Nakhon Pathom, embracing the tranquility of Ban Khiri Wong, or supporting the Rabbit in the Moon Foundation, every journey is a chance to discover something new and leave a positive impact.",
+      ctaLabel: 'Discover more',
+      ctaHref: '#pursuit',
+    },
   },
 
   luxury: {
-    heading: 'Our guide to luxury travel',
-    body: 'We create bespoke luxury holidays for people who want more than just beautiful places.',
+    TH: {
+      heading: 'สินค้าและกิจกรรมจากชุมชน',
+      body: 'ค้นพบสินค้าท้องถิ่นและกิจกรรมที่สร้างสรรค์ร่วมกับชุมชนจากหลากหลายพื้นที่ ทุกการเลือกซื้อและทุกการเข้าร่วมกิจกรรมมีส่วนช่วยสนับสนุนอาชีพของคนในท้องถิ่น อนุรักษ์วัฒนธรรม และส่งเสริมการท่องเที่ยวอย่างยั่งยืน'
+    },
+    ENG: {
+      heading: 'Explore Community Experiences',
+      body: 'Discover a wide selection of locally crafted products and meaningful activities created together with communities. Every purchase and every experience helps support local livelihoods, preserve cultural heritage, and promote sustainable tourism.',
+    },
   },
+  //===============================================================//
 
   socialImpact: {
-    heading: 'Social Impact',
-    subheading: 'ผลลัพธ์จากการขับเคลื่อนและร่วมมือกับชุมชนตลอดปี 2025–2026 เพื่อสร้างความยั่งยืนในทุกมิติ',
-    stats: [
-      {
-        id: "s1",
-        value: "การศึกษา\nสิ่งแวดล้อม\nระบบสาธารณะสุข",
-        label: "สนับสนุนชุมชนในหลายด้าน",
-        description: "รายจากการขายสินค้าและกิจกรรมจะถูกนำไปสนับสนุนชุมชนในด้านต่างๆ"
-      },
-      {
-        id: "s2",
-        value: "0",
-        label: "ให้ความรู้และสร้างอาชีพให้กับคนในชุมชน(คน)",
-        description: "คำนวณจากยอดขายสะสมของเว็บไซต์"
-      },
-      {
-        id: "s3",
-        value: "0",
-        label: "สร้างรายได้ให้คนในชุมชน(บาท)",
-        description: "จำนวนรายได้ที่สร้างให้กับคนในชุมชน"
-      }
-    ],
+    TH: {
+      heading: "ผลกระทบต่อสังคม",
+      subheading:
+        "ผลลัพธ์จากการขับเคลื่อนและร่วมมือกับชุมชนตลอดปี 2025–2026 เพื่อสร้างความยั่งยืนในทุกมิติ",
+      stats: [
+        {
+          id: "s1",
+          value: "การศึกษา\nสิ่งแวดล้อม\nระบบสาธารณะสุข",
+          label: "สนับสนุนชุมชนในหลายด้าน",
+          description:
+            "รายได้จากการขายสินค้าและกิจกรรมจะถูกนำไปสนับสนุนชุมชนในด้านต่างๆ",
+        },
+        {
+          id: "s2",
+          value: "0",
+          label: "ให้ความรู้และสร้างอาชีพให้กับคนในชุมชน(คน)",
+          description: "คำนวณจากยอดขายสะสมของเว็บไซต์",
+        },
+        {
+          id: "s3",
+          value: "0",
+          label: "สร้างรายได้ให้คนในชุมชน(บาท)",
+          description: "จำนวนรายได้ที่สร้างให้กับคนในชุมชน",
+        },
+      ],
+    },
+
+    ENG: {
+      heading: "Social Impact",
+      subheading:
+        "The outcomes of our collaboration with local communities throughout 2025–2026 to create sustainability in every dimension.",
+      stats: [
+        {
+          id: "s1",
+          value: "Education\nEnvironment\nPublic Health",
+          label: "Supporting Communities in Multiple Areas",
+          description:
+            "Revenue from product sales and activities is used to support community development.",
+        },
+        {
+          id: "s2",
+          value: "0",
+          label: "People Trained and Supported",
+          description: "Calculated from cumulative website sales.",
+        },
+        {
+          id: "s3",
+          value: "0",
+          label: "Income Generated (THB)",
+          description: "Total income generated for the community.",
+        },
+      ],
+    },
   },
 
   footer: {
-    brand: {
-      name: 'SookD',
-      tagline:
-        'มุ่งเชื่อมโยงนักเดินทางเข้ากับประสบการณ์ที่มีความหมาย การเดินทางไม่ควรเป็นเพียงการพักผ่อน แต่ควรเป็นโอกาสในการเรียนรู้ สร้างความสัมพันธ์กับธรรมชาติและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้ ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจ ทั้งผู้คน ชุมชน และสิ่งแวดล้อม',
+    TH: {
+      brand: {
+        name: 'SookD',
+        tagline:
+          'มุ่งเชื่อมโยงนักเดินทางเข้ากับประสบการณ์ที่มีความหมาย การเดินทางไม่ควรเป็นเพียงการพักผ่อน แต่ควรเป็นโอกาสในการเรียนรู้ สร้างความสัมพันธ์กับธรรมชาติและร่วมเป็นส่วนหนึ่งในการดูแลโลกใบนี้ ด้วยการคัดสรรประสบการณ์คุณภาพจากผู้ให้บริการที่ใส่ใจ ทั้งผู้คน ชุมชน และสิ่งแวดล้อม',
+      },
+      address: {
+        lines: ['68/7 หมู่ 3 ตำบลบางกอบัว', 'อำเภอพระประแดง', 'จังหวัดสมุทรปราการ 10130'],
+      },
+      contact: {
+        items: [
+          { icon: 'phone', label: '+66925054994', href: 'tel:+66925054994' },
+          { icon: 'email', label: 'info.learndo@gmail.com', href: 'mailto:info.learndo@gmail.com' },
+          { icon: 'facebook', label: 'facebook.com/LearnDoClub', href: 'https://www.facebook.com/LearnDoClub' },
+          { icon: 'line', label: '@learndo', href: 'https://line.me/R/ti/p/@learndo' },
+        ],
+      },
+      copyright: 'Copyright © 2026 – VANA. All rights reserved.',
     },
-    address: {
-      lines: ['68/7 หมู่ 3 ตำบลบางกอบัว', 'อำเภอพระประแดง', 'จังหวัดสมุทรปราการ 10130'],
+    ENG: {
+      brand: {
+        name: "SookD",
+        tagline:
+          "We connect travelers with meaningful experiences. Travel should be more than just a getaway—it should be an opportunity to learn, build meaningful connections with nature, and become part of protecting our planet. We carefully curate high-quality experiences from providers who genuinely care about people, local communities, and the environment.",
+      },
+
+      address: {
+        lines: [
+          "68/7 Moo 3, Bang Kobua Subdistrict",
+          "Phra Pradaeng District",
+          "Samut Prakan 10130, Thailand",
+        ],
+      },
+
+      contact: {
+        items: [
+          { icon: "phone", label: "+66925054994", href: "tel:+66925054994" },
+          { icon: "email", label: "info.learndo@gmail.com", href: "mailto:info.learndo@gmail.com" },
+          {
+            icon: "facebook",
+            label: "facebook.com/LearnDoClub",
+            href: "https://www.facebook.com/LearnDoClub",
+          },
+          {
+            icon: "line",
+            label: "@learndo",
+            href: "https://line.me/R/ti/p/@learndo",
+          },
+        ],
+      },
+
+      copyright: "Copyright © 2026 – VANA. All rights reserved.",
     },
-    contact: {
-      items: [
-        { icon: 'phone', label: '+66925054994', href: 'tel:+66925054994' },
-        { icon: 'email', label: 'info.learndo@gmail.com', href: 'mailto:info.learndo@gmail.com' },
-        { icon: 'facebook', label: 'facebook.com/LearnDoClub', href: 'https://www.facebook.com/LearnDoClub' },
-        { icon: 'line', label: '@learndo', href: 'https://line.me/R/ti/p/@learndo' },
-      ],
-    },
-    copyright: 'Copyright © 2026 – VANA. All rights reserved.',
   },
 };

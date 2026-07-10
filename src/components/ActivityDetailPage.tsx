@@ -343,7 +343,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
               {activity.min_participants > 0 && (
                 <div className="adet__field">
                   <span className="adet__field-label">{lang === 'TH' ? 'จำนวนผู้เข้าร่วมขั้นต่ำ' : 'Minimum number of participants'}:</span>
-                  <span className="adet__field-val">{activity.min_participants} คน</span>
+                  <span className="adet__field-val">{activity.min_participants} {lang === 'TH' ? "คน":"persons"}</span>
                 </div>
               )}
             </div>
@@ -409,7 +409,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
 
       </div>
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
 
       {/* ── Booking Modal ── */}
       {showBookingModal && (
@@ -434,7 +434,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
             <p className="adet__modal-msg">For legal entities, please contact the administrator for further inquiries via the channels below:</p>
             <h4 className="adet__contact-modal-subtitle">Contact Us</h4>
             <ul className="adet__contact-modal-list">
-              {c.footer.contact.items.map(item => (
+              {c.footer[lang].contact.items.map(item => (
                 <li key={item.label} className="adet__contact-modal-item">
                   <ContactIcon type={item.icon} size={18} color="var(--forest)" />
                   <a href={item.href} className="adet__contact-modal-link" target="_blank" rel="noopener noreferrer">{item.label}</a>

@@ -146,7 +146,7 @@ export default function MembershipPage({ lang = 'TH' }: MembershipPageProps) {
       </div>
 
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }

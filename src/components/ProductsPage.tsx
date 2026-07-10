@@ -165,7 +165,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
           </div>
         </div>
 
-        {loading && <p className="exp-state">กำลังโหลดสินค้า...</p>}
+        {loading && <p className="exp-state">{lang==="TH"? "กำลังโหลดสินค้า...":"loading"}</p>}
         {error && <p className="exp-state exp-state--error">{error}</p>}
 
         {!loading && !error && (
@@ -194,7 +194,7 @@ export default function ProductsPage({ onSelectProduct, lang = 'TH' }: ProductsP
         )}
       </div>
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }

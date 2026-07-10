@@ -36,11 +36,24 @@ export interface JourneyCard {
   page?: string;
 }
 
+// export interface ImpactStat {
+//   id: string;
+//   value: string;
+//   label: string;
+//   description: string;
+// }
+
 export interface ImpactStat {
   id: string;
   value: string;
   label: string;
   description: string;
+}
+
+export interface SocialImpactContent {
+  heading: string;
+  subheading: string;
+  stats: ImpactStat[];
 }
 
 export interface ContactItem {
@@ -70,8 +83,14 @@ export interface SiteContent {
     cards: ExperienceCard[];
   };
   hero: {
-    heading: string;
-    subheading: string;
+    TH: {
+      heading: string;
+      subheading: string;
+    };
+    ENG: {
+      heading: string;
+      subheading: string;
+    }
   };
   journey: {
     heading: string;
@@ -82,19 +101,35 @@ export interface SiteContent {
     subtext: string;
   };
   pursuit: {
-    heading: string;
-    body: string;
-    ctaLabel: string;
-    ctaHref: string;
+    TH: {
+      heading: string;
+      body: string;
+      ctaLabel: string;
+      ctaHref: string;
+    };
+    ENG: {
+      heading: string;
+      body: string;
+      ctaLabel: string;
+      ctaHref: string;
+    };
   };
   luxury: {
-    heading: string;
-    body: string;
+    TH: {
+      heading: string;
+      body: string;
+    };
+    ENG: {
+      heading: string;
+      body: string;
+    };
   };
   socialImpact: {
-    heading: string;
-    subheading: string;
-    stats: ImpactStat[];
+    TH: SocialImpactContent;
+    ENG: SocialImpactContent;
   };
-  footer: FooterData;
+  footer: {
+    TH: FooterData;
+    ENG: FooterData;
+  };
 }

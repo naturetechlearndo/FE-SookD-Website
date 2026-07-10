@@ -88,8 +88,8 @@ interface PlaceData {
 const DISCOVER_PLACES: PlaceData[] = [
   {
     id: 'bangkachao',
-    name: 'บางกะเจ้า',
-    nameEn: 'Bang Kachao',
+    name: 'บางกะเจ้า(สมุทรปราการ)',
+    nameEn: 'Bang Kachao(Samut Prakan)',
     image: 'https://drive.google.com/file/d/1dzAeWnM4dR1JSQ13wsD-a0W2CbInr8gB/view?usp=drive_link',
     image2: 'https://drive.google.com/file/d/1RhST5yKE-pvc306zZJFVIO6_3kVEpult/view?usp=drive_link',
     detail: 'ใครเบื่อห้าง อยากหาที่รีเซ็ตสมอง แนะนำให้มาปั่นจักรยานชิลๆ ที่คุ้งบางกะเจ้าเลยครับ ตอนนี้เที่ยวโคตรง่ายเพราะเขามี แอปพลิเคชันช่วยเที่ยว คอยนำทางให้ เช็กพิกัด แพลนทริปได้ในมือถือเลย ไม่มีหลงแน่นอน รอบนี้จัดมาให้เลือกตามใจชอบถึง 3 เส้นทาง 3 สไตล์ ชอบแบบไหนเลือกเลย!\n\n📌 ไฮไลท์ห้ามพลาดในทริป:\n📱 โหลดแอปฯ เดียวจบ: นำทางแม่นยำ เช็กกิจกรรมชุมชนได้แบบเรียลไทม์\n\n🗺️ 3 เส้นทางเลือกได้ตามฟีล:\nสายธรรมชาติ: ปั่นรับลม สูดโอโซน ถ่ายรูปมุมมหาชนที่ สวนศรีนครเขื่อนขันธ์\nสายกิจกรรม: ไปดูชีวิต ผึ้งชันโรง (ผึ้งจิ๋วไม่มีเหล็กไน) น่ารักและเป็นมิตรมาก\nสายวัฒนธรรม: แวะเสพประวัติศาสตร์ที่ พิพิธภัณฑ์บ้านคลองบน แล้วเดินสายไหว้พระตามวัดในพื้นที่\n\n🎨 เวิร์กช้อปทำมือสุดคราฟต์: ได้ลองทำสบู่สมุนไพร, มัดย้อมผ้าสีธรรมชาติ และทำขนมพื้นถิ่นกินเอง สนุกมาก!',
@@ -174,7 +174,7 @@ const DISCOVER_PLACES: PlaceData[] = [
   },
   {
     id: 'khiriwong',
-    name: 'บ้านคีรีวง',
+    name: 'บ้านคีรีวง(นครศรีธรรมราช)',
     nameEn: 'Ban Khiriwong (Nakhon Si Thammarat)',
     image: 'https://drive.google.com/file/d/1hcoqE6vHhArhj0bpGrpqf9VuIqSd3u2E/view?usp=drive_link',
     image2: 'https://drive.google.com/file/d/1ljh0wqxRnoWJwDT_64zdHN30ZGhLgJAZ/view?usp=drive_link',
@@ -191,7 +191,7 @@ const DISCOVER_PLACES: PlaceData[] = [
   },
   {
     id: 'moonrabbit',
-    name: 'มูลนิธิกระต่ายในดวงจันทร์',
+    name: 'มูลนิธิกระต่ายในดวงจันทร์(ราชบุรี)',
     nameEn: 'Moon Rabbit Foundation (Ratchaburi)',
     image: 'https://drive.google.com/file/d/1MU8r1Xp2fkSEb2Dujk6VQywh1TzcIR6C/view?usp=drive_link',
     image2: 'https://drive.google.com/file/d/1y26hSfv9Eho25A5deQSmzbRnFv9zTDZS/view?usp=drive_link',
@@ -554,7 +554,7 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
           </div>
         </div>
       </div>
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
 
       {/* Highlight modal */}
       {activeHighlight?.modal && (

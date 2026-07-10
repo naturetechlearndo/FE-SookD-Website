@@ -113,7 +113,7 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
             <div className="about__info-block">
               <h3 className="about__info-title">{isTH ? 'ที่อยู่' : 'Address'}</h3>
               <address className="about__address">
-                {(isTH ? c.footer.address.lines : ADDRESS_EN).map((line, i) => (
+                {(isTH ? c.footer[lang].address.lines : ADDRESS_EN).map((line, i) => (
                   <span key={i}>{line}<br /></span>
                 ))}
               </address>
@@ -122,7 +122,7 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
             <div className="about__info-block">
               <h3 className="about__info-title">{isTH ? 'ติดต่อเรา' : 'Contact Us'}</h3>
               <ul className="about__contact-list">
-                {c.footer.contact.items.map(item => (
+                {c.footer[lang].contact.items.map(item => (
                   <li key={item.label} className="about__contact-item">
                     <span className="about__ci-icon">
                       <ContactIcon type={item.icon} size={18} color="#2d6a4f" />
@@ -140,7 +140,7 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
       </section>
 
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }

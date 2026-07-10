@@ -222,7 +222,7 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
         )}
       </div>
       <div className="section-gap" />
-      <Footer data={c.footer} />
+      <Footer data={c.footer[lang]} />
     </>
   );
 }
