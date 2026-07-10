@@ -42,7 +42,7 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
       .then((orders: any[]) => {
         const pts = orders
           .filter((o: any) => o.order_status === 'completed')
-          .reduce((s: number, o: any) => s + Math.floor(Number(o.total_price || 0) / 10), 0);
+          .reduce((s: number, o: any) => s + Math.floor(Number(o.total_price || 0) / 100), 0);
         setUserPoints(pts);
       })
       .catch(() => {});
@@ -72,7 +72,7 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
             order_date: new Date().toISOString().split('T')[0],
             item_id: item.itemId,
             quantity: item.qty,
-            total_price: item.price * item.qty,
+            total_price: Math.round(item.price * item.qty * (1 - discountPct)),
             order_status: item.itemType === 'activity' ? 'completed' : 'processing',
             shipping_address: currentUser?.address || '',
             act_date: item.actDate || '',

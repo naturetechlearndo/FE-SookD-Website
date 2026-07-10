@@ -177,7 +177,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
       .then((allOrders: any[]) => {
         const pts = allOrders
           .filter(o => o.order_status?.toLowerCase() === 'completed')
-          .reduce((sum, o) => sum + Math.floor(Number(o.total_price || 0) / 10), 0);
+          .reduce((sum, o) => sum + Math.floor(Number(o.total_price || 0) / 100), 0);
         setCalculatedPoints(pts);
         if (pts !== Number(user.point ?? 0)) {
           api.auth.updateUser(user.user_id, { point: pts })

@@ -153,7 +153,7 @@ const DISCOVER_PLACES: PlaceData[] = [
     onlineActivity: 'นี่คือไฮไลท์ทิวทัศน์และเรื่องราวที่คุณจะได้สัมผัส ณ \'นครปฐม\' เมืองแห่งความทรงจำที่ไม่ได้มีเพียงแค่วัดวาอาราม แต่ยังซ่อนมุมอาร์ต คาเฟ่โฮมมี่ และวิถีชีวิตผู้คนที่พร้อมโอบกอดคุณด้วยความอบอุ่น มาร่วมเติมเต็มชิ้นส่วนความทรงจำที่หายไป และออกเดินทางไปค้นหาความคิดถึงด้วยกันในทริปนี้กันนะคะ',
     onlineActivityVideo: 'https://youtu.be/-dKvtTxihgo?si=lzsBO5pxGx1Zs63-',
     faq: 'Q: สิ่งที่จะได้รับจากโปรแกรมนี้มีอะไรบ้าง?\nAns: บอกเลยว่าคุ้มสุดๆ สำหรับสายทำคอนเทนต์ เพราะคุณจะได้รับ:\nไฟล์รูปภาพสวยๆ 30+ รูป (คัดมาให้เน้นๆ)\nวิดีโอสั้นสำหรับทำ Reels / TikTok คอยเก็บโมเมนต์เผลอๆ ตลอดทริป',
-    activityIds: [],
+    activityIds: ['ACT019'],
     showActivityHeader: true,
   },
   {
@@ -655,6 +655,7 @@ export const DISCOVER_CSS = `
   display: grid; grid-template-columns: 1fr 1.4fr; gap: 2rem;
   align-items: start;
 }
+.disc-activity__left { padding-top: 2cm; }
 .disc-act-list {
   list-style: decimal; padding-left: 1.4rem;
   font-family: var(--font-th); font-size: .92rem;
