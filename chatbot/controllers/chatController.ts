@@ -94,7 +94,7 @@ export async function chatController(
 
         //========Intent================//
 
-        const intent = getIntent(question, "en");
+        const intent = getIntent(question, language);
 
 
         let fuse;
@@ -189,7 +189,7 @@ export async function chatController(
 
 
         //=========FAQ=========//
-        console.log("lang",language);
+        console.log("lang", language);
         const faqFuse = await createFAQFuse(language);
 
         const faqAnswer =
@@ -238,7 +238,7 @@ export async function chatController(
 
         //================ Context ==============//
 
-        const context = buildContext(result, "en");
+        const context = buildContext(result, language);
 
         //============== History =============//
 
@@ -269,6 +269,13 @@ export async function chatController(
             answer: string;
         };
 
+        answer = answer
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/\s*```$/, "")
+            .trim();
+
+        console.log("AI", answer);
         try {
 
             ai = JSON.parse(answer);
@@ -285,6 +292,18 @@ export async function chatController(
         }
 
         const selected = result[ai.selected - 1];
+
+
+        if (!selected) {
+            updateHistory(sessionId, question, answer);
+
+            return res.json({
+                answer: ai.answer,
+                showAdmin: session.questionCount >= 5
+            });
+        }
+
+        sessionSet(sessionId, selected.item);
 
         updateHistory(
             sessionId,
@@ -303,6 +322,7 @@ export async function chatController(
             link: selected?.item?.raw?.link,
             showAdmin: session.questionCount >= 5
         });
+
 
     } catch (err) {
 
@@ -325,7 +345,7 @@ export async function getSuggestionController(
     req: AuthRequest,
     res: Response
 ) {
-    const language =  req.query.language === "en" ? "en" : "th";
+    const language = req.query.language === "en" ? "en" : "th";
     try {
         const suggestions = await getSuggestions(language);
 

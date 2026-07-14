@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCart, saveCart, CartItem } from '../utils/cart';
 import { api } from '../services/api';
+import { FaLine, FaRegCopy } from "react-icons/fa";
 
 interface Props {
   currentUser?: any;
@@ -64,12 +65,17 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
   const handlePlaceOrder = async () => {
     if (placing || items.length === 0) return;
+    setLoadingPayment(true);
     setPlacing(true);
     setOrderErr('');
+    console.log("here1");
+    const { order_id } = await api.orders.generateId();
+    console.log(order_id);
     try {
       const results = await Promise.all(
         items.map(item =>
           api.orders.create({
+            order_id: order_id,
             user_id: currentUser?.user_id || '',
             order_date: new Date().toISOString().split('T')[0],
             item_id: item.itemId,
@@ -83,13 +89,25 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
         )
       );
 
-      setLoadingPayment(true);
 
-      await new Promise(resolve => setTimeout(resolve, 8000));
+      const orderId = results[results.length - 1].order_id;
 
-      console.log("here");
-      const orderId = results[0].order_id;
-      console.log(orderId);
+      let order = null;
+
+      for (let i = 0; i < 10; i++) {
+        try {
+          order = await api.orders.getOne(orderId);
+          break; // เจอแล้ว
+        } catch {
+          // ยังไม่เจอ รอ 1 วินาที
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      if (!order) {
+        throw new Error("Order not found after waiting");
+      }
+
       const payment =
         await api.line.payment({
           order_id: orderId
@@ -97,22 +115,20 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
 
       setPaymentUrl(payment);
-      console.log(payment);
 
       setLoadingPayment(false);
 
       const failed = results.filter(r => r && r.success === false);
       if (failed.length > 0) {
+        setLoadingPayment(false);
         setOrderErr(isTH ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Order failed, please try again.');
         return;
       }
       return;
-      // const all = getCart();
-      // const checkedIds = new Set(items.map(i => i.id));
-      // saveCart(all.filter(i => !checkedIds.has(i.id)));
-      // onNavigate('home');
+
     } catch (err) {
       console.error('Order failed:', err);
+      setLoadingPayment(false);
       setOrderErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่' : 'Cannot connect to server, please try again.');
     } finally {
       setPlacing(false);
@@ -270,34 +286,44 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
                   : "Click below to continue with LINE payment"}
               </p>
 
-              <div className='linkBox'>
-                {paymentUrl}
+              <div className="linkBox">
+                <div className="linkBox__text">
+                  {paymentUrl}
+                </div>
+
+                <button
+                  className="linkBox__copy"
+                  onClick={() => navigator.clipboard.writeText(paymentUrl)}
+                  title={isTH ? "คัดลอกลิงก์" : "Copy link"}
+                >
+                  <FaRegCopy />
+                </button>
               </div>
 
-              <button
-                onClick={() => {
-                  window.open(paymentUrl, "_blank");
+              <div className="payment-actions">
+                <button
+                  className="payment-actions__line"
+                  onClick={() => {
+                    window.open(paymentUrl, "_blank");
 
-                  const all = getCart();
-                  const checkedIds = new Set(items.map(i => i.id));
-                  saveCart(all.filter(i => !checkedIds.has(i.id)));
+                    const all = getCart();
+                    const checkedIds = new Set(items.map(i => i.id));
+                    saveCart(all.filter(i => !checkedIds.has(i.id)));
 
-                  onNavigate('home');
-                }}
-              >
-                {isTH
-                  ? "เปิด LINE ชำระเงิน"
-                  : "Open LINE"}
-              </button>
+                    onNavigate('home');
+                  }}
+                >
+                  <FaLine size={22} />
+                  <span>{isTH ? "ชำระเงิน" : "Pay here"}</span>
+                </button>
 
-
-              <button
-                onClick={() => setPaymentUrl("")}
-              >
-                {isTH
-                  ? "ยกเลิก"
-                  : "cancle"}
-              </button>
+                <button
+                  className="payment-actions__cancel"
+                  onClick={() => setPaymentUrl("")}
+                >
+                  {isTH ? "ยกเลิก" : "Cancel"}
+                </button>
+              </div>
 
             </div>
 
@@ -538,19 +564,84 @@ export const CHECKOUT_CSS = `
 }
 
 .linkBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
   width: 100%;
-  background: #eee;
-  color: #333;
+  padding: 14px 16px;
 
-  padding: 12px 16px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+
   box-sizing: border-box;
-  border-radius: 8px;
+}
 
-  max-height: 150px;
+.linkBox__text {
+  flex: 1;
+
+  max-height: 120px;
   overflow-y: auto;
 
-  overflow-wrap: break-word;
+  color: #444;
+  font-size: 14px;
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
   word-break: break-word;
+    /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd transparent;
+}
+
+/* Chrome / Edge / Safari */
+.linkBox__text::-webkit-scrollbar {
+  width: 5px;
+}
+
+.linkBox__text::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.linkBox__text::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 999px;
+}
+
+.linkBox__text::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.linkBox__copy {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #848484;
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  font-size: 18px;
+
+  transition: .2s;
+}
+
+.linkBox__copy:hover {
+  background: #05b34c;
+  transform: scale(1.05);
+}
+
+.linkBox__copy:active {
+  transform: scale(0.96);
 }
 
 .payment-box {
@@ -582,36 +673,48 @@ export const CHECKOUT_CSS = `
 }
 
 
-.payment-box button {
-  width: 40%;
+.payment-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
 
+.payment-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 140px;
   padding: 12px 20px;
 
   border: none;
   border-radius: 10px;
 
-  background: #06c755;
-  color: white;
-
-  font-size: 16px;
+  font: inherit;
   font-weight: 600;
 
   cursor: pointer;
-
-  margin: 5px;
-  font:inherit;
+  transition: all .2s ease;
 }
 
-
-.payment-box button:hover {
-  opacity: 0.9;
+.payment-actions__line {
+  background: #06c755;
+  color: #fff;
 }
 
+.payment-actions__line:hover {
+  background: #05b34c;
+}
 
-/* ปุ่มปิด */
-.payment-box button:last-child {
-  background: #eee;
+.payment-actions__cancel {
+  background: #ececec;
   color: #333;
+}
+
+.payment-actions__cancel:hover {
+  background: #ddd;
 }
 
 

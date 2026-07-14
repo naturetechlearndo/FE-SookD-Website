@@ -61,7 +61,8 @@ User: Do you have accommodation?
 Uncle: Sorry, Uncle doesn't have information about that yet.
 
 If you answer using one of the provided items,
-return the item number and Return JSON only.
+return the item number and Return JSON only. if you didn't 
+choose anything selected = 4
 
 {
   "selected": 2,
@@ -92,8 +93,13 @@ ${question}
 - ใช้ภาษาพูดได้
 - แต่ห้ามเพิ่มข้อมูลที่ไม่มีให้
 - ถ้ามีชื่อสินค้า หรือข้อมูลบางส่วน ให้ตอบจากข้อมูลที่มีว่าตรงกับคำถามหรือไม่
-- หากไม่มีข้อมูล ให้ตอบว่า "ขอโทษทีนะ...ลุงยังไม่มีข้อมูลเรื่องนี้เลยจ่ะ"
 - ไม่ใช้ Markdown เช่น ** หรือ #
+- ถ้าเลือกของจากข้อมูลที่ส่งให้ตอบกลับตัวเลขของที่เลือกมาด้วยและตอบมาเป็นjsonเท่านั้น ถ้าไม่ได้เลือกเลยให้selected=4
+
+{
+  "selected": 2,
+  "answer": "..."
+}
 ตัวอย่างการตอบ:
 
 ผู้ใช้: สวัสดี

@@ -98,6 +98,12 @@ export const api = {
 
       return result;
     },
+    generateId: async () => {
+      console.log("Here2");
+      const res = await fetch(`${BASE_URL}/orders/generate-id`);
+      console.log(res);
+      return await res.json();
+    },
     getByItemId: (itemId: string) => get<any[]>(`/orders/item/${itemId}`),
     create: async (body: object) => {
       const res = await fetch(`${BASE_URL}/orders`, {

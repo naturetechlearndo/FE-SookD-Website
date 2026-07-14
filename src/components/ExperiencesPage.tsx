@@ -52,6 +52,10 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
 
+  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
+  const allLabel = 'ทั้งหมด';
+
+
   useEffect(() => {
     const stored = sessionStorage.getItem('featuredActivities');
     if (stored) {
@@ -80,9 +84,6 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
-
-  const langSuffix = lang === 'TH' ? '_TH' : '_EN';
-  const allLabel = 'ทั้งหมด';
 
   useEffect(() => { setActiveType(allLabel); }, [lang]);
 

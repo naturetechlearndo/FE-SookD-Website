@@ -112,6 +112,24 @@ export async function getOrdersByUserId(
     }
 }
 
+export async function generateOrderId(
+    req: Request,
+    res: Response
+) {
+    try {
+        const orderId = await orderService.generateOrderId();
+
+        res.json({
+            success: true,
+            order_id: orderId
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false
+        });
+    }
+}
+
 export async function createOrder(
     req: Request,
     res: Response

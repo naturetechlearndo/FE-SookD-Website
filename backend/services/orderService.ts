@@ -5,7 +5,6 @@ import { getSheetData, clearSheetCache } from "./googleSheetService";
 export async function getOrders()
     : Promise<Order[]> {
     const data = await getSheetData("orders");
-
     return data.map((item: any) => ({
         order_id: item.order_id,
         user_id: item.user_id,
@@ -20,63 +19,111 @@ export async function getOrders()
     }));
 }
 
-export async function getOrderById(
-    id: string
-): Promise<Order | undefined> {
+// export async function getOrderById(
+//     id: string
+// ): Promise<Order | undefined> {
 
-    const orders = await getOrders();
+//     const orders = await getOrders();
 
-    return orders.find(
-        order => order.order_id === id
-    );
+//     console.log("Search:", id);
+//     console.log("Total:", orders.length);
+
+//     const order = orders.find(o => o.order_id === id);
+
+//     console.log("Found:", order);
+
+//     return order;
+// }
+
+export async function getOrderById(id: string): Promise<Order | undefined> {
+    const response = await fetch(process.env.GAS_URL!, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            action: "getOrderById",
+            order_id: id
+        })
+    });
+
+    // console.log("status", response.status);
+
+    const text = await response.text();
+
+    // console.log("text =", text);
+
+    const result = JSON.parse(text);
+    return result.order;
 }
 
 export async function getOrdersById(id: string) {
-    // console.log("service", id);
+    // const orders = await getOrders();
+    // return orders.filter(o => o.order_id === id);
 
+    console.log("id", id);
+    const response = await fetch(process.env.GAS_URL!, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            action: "getOrdersById",
+            order_id: id
+        })
+    });
+
+    // console.log("status", response.status);
+
+    const text = await response.text();
+
+    console.log("text =", text);
+
+    const result = JSON.parse(text);
+
+    return result.orders;
+
+}
+
+export async function generateOrderId(): Promise<string> {
     const orders = await getOrders();
 
-    // console.log(orders.length);
-
-    return orders.filter(o => o.order_id === id);
+    return generateNextId(
+        orders.map(o => o.order_id),
+        "ORD"
+    );
 }
 
 export async function createOrder(
-    orderData: Omit<Order, "order_id">
+    orderData: Order
 ): Promise<Order> {
 
-    const orders =
-        await getOrders();
-
-    const orderId =
-        generateNextId(
-            orders.map(
-                o => o.order_id
-            ),
-            "ORD"
-        );
+    // const orders = await getOrders();
 
     const newOrder: Order = {
-        order_id: orderId,
         ...orderData
     };
 
-    await fetch(
-        process.env.GAS_URL!,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type":
-                    "application/json"
-            },
-            body: JSON.stringify({
-                action: "createOrder",
-                data: newOrder ?? {}
-            })
-        }
-    );
+    const response = await fetch(process.env.GAS_URL!, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            action: "createOrder",
+            data: newOrder
+        })
+    });
+
+    const result = await response.json();
+    console.log(result);
+
+    if (!result.success) {
+        throw new Error("Create order failed");
+    }
 
     clearSheetCache("orders");
+
     return newOrder;
 }
 

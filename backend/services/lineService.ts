@@ -209,13 +209,13 @@ export async function pushSlipToGroup(
 
                             type: "bubble",
 
-                            hero: {
-                                type: "image",
-                                url: slipUrl,
-                                size: "full",
-                                aspectRatio: "20:13",
-                                aspectMode: "cover"
-                            },
+                            // hero: {
+                            //     type: "image",
+                            //     url: slipUrl,
+                            //     size: "full",
+                            //     aspectRatio: "20:13",
+                            //     aspectMode: "cover"
+                            // },
 
                             body: {
                                 type: "box",
