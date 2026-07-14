@@ -24,6 +24,7 @@ const NAV_LABELS_TH: Record<string, string> = {
 export default function Navbar({ links, onNavigate, currentPage = 'home', lightTop = false, currentUser, onLogout, lang = 'TH', onLangChange, cartCount = 0 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -36,6 +37,7 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
       e.preventDefault();
       (window as any).gtag?.('event', 'click_nav_menu', { menu_item: link.label });
       onNavigate(link.page);
+      setDrawerOpen(false);
     }
   };
 
@@ -52,6 +54,15 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
   return (
     <>
       <nav className={`navbar ${(scrolled || lightTop) ? 'navbar--scrolled' : ''}`}>
+        {/* Hamburger button — mobile only */}
+        <button
+          className="navbar__hamburger"
+          aria-label="Open menu"
+          onClick={() => setDrawerOpen(true)}
+        >
+          <span /><span /><span />
+        </button>
+
         {/* Logo */}
         <a href="/" className="navbar__logo" aria-label="SookD Home" onClick={handleLogo}>
           <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />
@@ -131,6 +142,64 @@ export default function Navbar({ links, onNavigate, currentPage = 'home', lightT
           )}
         </div>
       </nav>
+
+      {/* Mobile drawer overlay */}
+      {drawerOpen && (
+        <div className="navbar__drawer-overlay" onClick={() => setDrawerOpen(false)} />
+      )}
+
+      {/* Mobile drawer */}
+      <div className={`navbar__drawer ${drawerOpen ? 'navbar__drawer--open' : ''}`}>
+        <button className="navbar__drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close menu">✕</button>
+
+        <a href="/" className="navbar__logo navbar__drawer-logo" onClick={e => { handleLogo(e); setDrawerOpen(false); }}>
+          <img src="/img/logo.png" alt="SookD logo" className="navbar__logo-img" />
+        </a>
+
+        <ul className="navbar__drawer-links">
+          {links.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                className={`navbar__drawer-link${link.page === currentPage ? ' navbar__drawer-link--active' : ''}`}
+                onClick={(e) => handleLink(e, link)}
+              >
+                {lang === 'TH' ? (NAV_LABELS_TH[link.label] ?? link.label) : link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div className="navbar__drawer-bottom">
+          <div className="navbar__lang navbar__drawer-lang">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <button className={`navbar__lang-btn${lang === 'TH' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('TH')}>TH</button>
+            <span className="navbar__lang-sep">|</span>
+            <button className={`navbar__lang-btn${lang === 'ENG' ? ' navbar__lang-btn--active' : ''}`} onClick={() => onLangChange?.('ENG')}>ENG</button>
+          </div>
+
+          {currentUser ? (
+            <div className="navbar__drawer-user">
+              <div className="navbar__avatar">{initial}</div>
+              <span className="navbar__username" style={{ color: 'var(--forest)' }}>{displayName}</span>
+              <button className="navbar__icon-btn" style={{ color: 'var(--forest)', marginLeft: 'auto' }} onClick={() => { setDrawerOpen(false); setShowLogout(true); }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <a href="#join" className="navbar__cta navbar__drawer-cta"
+              onClick={e => { e.preventDefault(); onNavigate?.('login'); setDrawerOpen(false); }}>
+              {lang === 'TH' ? 'เข้าร่วมกับเรา' : 'Join Us'}
+            </a>
+          )}
+        </div>
+      </div>
 
       {/* Logout confirmation modal */}
       {showLogout && (

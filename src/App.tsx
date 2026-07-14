@@ -684,8 +684,77 @@ white-space: pre-line;
   .footer__inner{grid-template-columns:1fr 1fr}
   :root{--section-gap:60px}
 }
+/* ── Hamburger button ─────────────────────────────────────────── */
+.navbar__hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px; width: 36px; height: 36px;
+  background: none; border: none; cursor: pointer; padding: 4px;
+  margin-right: .5rem; flex-shrink: 0;
+}
+.navbar__hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: rgba(255,255,255,.9); border-radius: 2px;
+  transition: background var(--ease);
+}
+.navbar--scrolled .navbar__hamburger span { background: var(--forest); }
+
+/* ── Mobile drawer ────────────────────────────────────────────── */
+.navbar__drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 299; animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.navbar__drawer {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: 280px; max-width: 85vw;
+  background: var(--white); z-index: 300;
+  display: flex; flex-direction: column;
+  padding: 1.5rem 1.5rem 2rem;
+  transform: translateX(-100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow: 4px 0 24px rgba(0,0,0,.12);
+}
+.navbar__drawer--open { transform: translateX(0); }
+
+.navbar__drawer-close {
+  align-self: flex-end; background: none; border: none;
+  font-size: 1.4rem; cursor: pointer; color: var(--forest);
+  padding: 0; line-height: 1; margin-bottom: .5rem;
+}
+.navbar__drawer-logo { margin-bottom: 1.5rem; }
+
+.navbar__drawer-links {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 0;
+  flex: 1; overflow-y: auto;
+}
+.navbar__drawer-link {
+  display: block; padding: 1rem 0;
+  font-size: 1.05rem; font-weight: 500; color: var(--forest);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  transition: color var(--ease);
+}
+.navbar__drawer-link:hover { color: var(--mint); }
+.navbar__drawer-link--active { font-weight: 700; color: var(--mint); }
+
+.navbar__drawer-bottom {
+  margin-top: 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.navbar__drawer-lang { color: var(--forest); gap: .4rem; }
+.navbar__drawer-user {
+  display: flex; align-items: center; gap: .6rem;
+}
+.navbar__drawer-cta {
+  display: block; text-align: center;
+  padding: .7rem 1.4rem;
+}
+
 @media(max-width:768px){
   .navbar__links{display:none}
+  .navbar__hamburger{display:flex}
   .hero__mascot{height:110px}
   .journey__cards{grid-template-columns:1fr}
   .pursuit{grid-template-columns:1fr}
