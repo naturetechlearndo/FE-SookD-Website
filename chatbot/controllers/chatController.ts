@@ -269,14 +269,21 @@ export async function chatController(
             answer: string;
         };
 
-        try {
-            // Gemini sometimes wraps JSON in markdown fences or adds leading text — extract the first { } block
-            const jsonMatch = answer.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) throw new Error("no JSON found");
-            ai = JSON.parse(jsonMatch[0]);
+        // Gemini may return plain text (no match) or JSON wrapped in code fences
+        const jsonMatch = answer.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            // Plain text response — use it directly
+            updateHistory(sessionId, question, answer);
+            return res.json({
+                answer,
+                showAdmin: session.questionCount >= 5
+            });
+        }
 
+        try {
+            ai = JSON.parse(jsonMatch[0]);
         } catch {
-            console.error("Gemini parse fail, raw answer:", answer);
+            console.error("Gemini JSON parse fail, raw:", answer);
             return res.json({
                 answer:
                     language === "en"
@@ -287,6 +294,15 @@ export async function chatController(
         }
 
         const selected = result[ai.selected - 1];
+
+        // Guard: if selected index is out of range, return answer text only
+        if (!selected) {
+            updateHistory(sessionId, question, ai.answer);
+            return res.json({
+                answer: ai.answer,
+                showAdmin: session.questionCount >= 5
+            });
+        }
 
         updateHistory(
             sessionId,
