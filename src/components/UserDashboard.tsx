@@ -138,9 +138,10 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* review edit/delete state */
+  /* review edit/delete/create state */
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [newItemId, setNewItemId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(0);
 
@@ -200,7 +201,11 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     }
     if (tab === 'reviews') {
       setLoading(true);
-      api.reviews.getByUserId(user.user_id).then(setReviews).catch(() => []).finally(() => setLoading(false));
+      Promise.all([
+        api.orders.getByUserId(user.user_id),
+        api.reviews.getByUserId(user.user_id),
+      ]).then(([ords, revs]) => { setOrders(ords); setReviews(revs); })
+        .catch(() => {}).finally(() => setLoading(false));
     }
   }, [tab, user?.user_id]);
 
@@ -231,6 +236,22 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch { }
     setReviews(rs => rs.map(r => r.review_id === reviewId ? { ...r, rating: editRating, comment: editText } : r));
     setEditId(null);
+  }
+
+  async function doCreate(itemId: string) {
+    try {
+      const res = await api.reviews.create({
+        user_id: user.user_id,
+        item_id: itemId,
+        rating: editRating,
+        comment: editText,
+        review_date: new Date().toISOString().slice(0, 10),
+      });
+      if (res?.review_id) setReviews(rs => [...rs, res]);
+    } catch { }
+    setNewItemId(null);
+    setEditText('');
+    setEditRating(0);
   }
 
   async function handleSaveInfo() {
@@ -564,68 +585,63 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 </div>
               </div>
 
-              {loading ? <p className="ud-loading">กำลังโหลด...</p> : reviews.length === 0
-                ? <p className="ud-empty">ยังไม่มีรีวิว</p>
-                : (() => {
-                  const filtered = reviews.filter(r => {
-                    const isPrd = String(r.item_id).startsWith('PRD');
+              {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
+                  // Build unique completed-order items merged with existing reviews
+                  const seenItemIds = new Set<string>();
+                  const mergedItems = orders
+                    .filter(o => o.order_status?.toLowerCase() === 'completed')
+                    .filter(o => { if (seenItemIds.has(o.item_id)) return false; seenItemIds.add(o.item_id); return true; })
+                    .map(o => ({ order: o, review: reviews.find(r => r.item_id === o.item_id) ?? null }));
+
+                  const filtered = mergedItems.filter(({ order, review }) => {
+                    const isPrd = String(order.item_id).startsWith('PRD');
                     if (reviewTypeFilter === 'product' && !isPrd) return false;
                     if (reviewTypeFilter === 'activity' && isPrd) return false;
-                    if (reviewDateFilter && r.review_date) {
-                      const rd = r.review_date.slice(0, 10);
-                      if (rd !== reviewDateFilter) return false;
+                    if (reviewDateFilter && review?.review_date) {
+                      if (review.review_date.slice(0, 10) !== reviewDateFilter) return false;
                     }
                     return true;
                   });
-                  if (filtered.length === 0) return <p className="ud-empty">ไม่พบรีวิวที่ตรงกับตัวกรอง</p>;
+
+                  if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ยังไม่มีออเดอร์ที่เสร็จสมบูรณ์' : 'No completed orders yet'}</p>;
+
                   return (
                     <div className="ud-review-grid">
-                      {filtered.map((r, i) => {
-                        const isProduct = String(r.item_id).startsWith('PRD');
-                        const item = isProduct ? getProduct(r.item_id) : getActivity(r.item_id);
+                      {filtered.map(({ order, review }, i) => {
+                        const isProduct = String(order.item_id).startsWith('PRD');
+                        const item = isProduct ? getProduct(order.item_id) : getActivity(order.item_id);
                         const name = item?.name;
-                        const isEditing = editId === r.review_id;
+                        const isEditing = review ? editId === review.review_id : newItemId === order.item_id;
                         const isCheckerA = (Math.floor(i / 2) + (i % 2)) % 2 === 0;
                         return (
-                          <div key={r.review_id} className={`ud-review-card ${isCheckerA ? 'ud-review-card--a' : 'ud-review-card--b'}`}>
+                          <div key={order.order_id} className={`ud-review-card ${isCheckerA ? 'ud-review-card--a' : 'ud-review-card--b'}`}>
                             <div className="ud-review-card__top">
                               <img className="ud-review-card__img" src={driveImg(item?.image ?? '')} alt={name}
                                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                               <div className="ud-review-card__info">
-                                <h4 className="ud-review-card__name">{name ?? r.item_id}</h4>
+                                <h4 className="ud-review-card__name">{name ?? order.item_id}</h4>
                                 <table className="ud-review-meta-table">
                                   <tbody>
                                     {isProduct ? (
                                       <>
-                                        {r.review_date && (
-                                          <tr>
-                                            <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
-                                            <td className="ud-rmt-sep">:</td>
-                                            <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
-                                          </tr>
-                                        )}
+                                        <tr>
+                                          <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
+                                          <td className="ud-rmt-sep">:</td>
+                                          <td className="ud-rmt-val">{fmtDate(order.order_date)}</td>
+                                        </tr>
                                         <tr>
                                           <td className="ud-rmt-label">{isTH ? 'รวม' : 'Total'}</td>
                                           <td className="ud-rmt-sep">:</td>
-                                          <td className="ud-rmt-val">{item?.price ?? '-'} {isTH ? 'บาท' : 'Baht'}</td>
+                                          <td className="ud-rmt-val">{order.total_price} {isTH ? 'บาท' : 'Baht'}</td>
                                         </tr>
                                       </>
                                     ) : (
                                       <>
-                                        {r.review_date && (
-                                          <tr>
-                                            <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
-                                            <td className="ud-rmt-sep">:</td>
-                                            <td className="ud-rmt-val">{fmtDate(r.review_date)}</td>
-                                          </tr>
-                                        )}
-                                        {item?.date && (
-                                          <tr>
-                                            <td className="ud-rmt-label">{isTH ? 'เวลา' : 'Time'}</td>
-                                            <td className="ud-rmt-sep">:</td>
-                                            <td className="ud-rmt-val">{item.date}</td>
-                                          </tr>
-                                        )}
+                                        <tr>
+                                          <td className="ud-rmt-label">{isTH ? 'วันที่' : 'Date'}</td>
+                                          <td className="ud-rmt-sep">:</td>
+                                          <td className="ud-rmt-val">{fmtDate(order.order_date)}</td>
+                                        </tr>
                                         {item?.location && (
                                           <tr>
                                             <td className="ud-rmt-label">{isTH ? 'สถานที่' : 'Location'}</td>
@@ -645,23 +661,36 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                                 <textarea className="ud-review-textarea"
                                   value={editText} onChange={e => setEditText(e.target.value)} />
                                 <div className="ud-review-actions">
-                                  <button className="ud-review-btn--save" onClick={() => doSave(r.review_id)}>{isTH ? 'บันทึก' : 'Save Changes'}</button>
-                                  <button className="ud-review-btn--cancel" onClick={() => setEditId(null)}>{isTH ? 'ยกเลิก' : 'Cancel'}</button>
+                                  <button className="ud-review-btn--save" onClick={() => review ? doSave(review.review_id) : doCreate(order.item_id)}>
+                                    {isTH ? 'บันทึก' : 'Save Changes'}
+                                  </button>
+                                  <button className="ud-review-btn--cancel" onClick={() => { setEditId(null); setNewItemId(null); }}>
+                                    {isTH ? 'ยกเลิก' : 'Cancel'}
+                                  </button>
                                 </div>
                               </>
                             ) : (
                               <>
-                                <Stars n={Number(r.rating)} />
-                                <p className="ud-review-comment">{r.comment}</p>
+                                <Stars n={Number(review?.rating ?? 0)} />
+                                {review?.comment && <p className="ud-review-comment">{review.comment}</p>}
                                 <div className="ud-review-actions">
-                                  <button className="ud-review-btn" onClick={() => { setEditId(r.review_id); setEditText(r.comment); setEditRating(Number(r.rating)); }}>
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                    {isTH ? 'แก้ไขรีวิว' : 'Edit Review'}
-                                  </button>
-                                  <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(r.review_id)}>
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
-                                    {isTH ? 'ลบรีวิว' : 'Delete Review'}
-                                  </button>
+                                  {review ? (
+                                    <>
+                                      <button className="ud-review-btn" onClick={() => { setEditId(review.review_id); setEditText(review.comment); setEditRating(Number(review.rating)); }}>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                        {isTH ? 'แก้ไขรีวิว' : 'Edit Review'}
+                                      </button>
+                                      <button className="ud-review-btn ud-review-btn--del" onClick={() => setDeleteId(review.review_id)}>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
+                                        {isTH ? 'ลบรีวิว' : 'Delete Review'}
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <button className="ud-review-btn" onClick={() => { setNewItemId(order.item_id); setEditText(''); setEditRating(0); }}>
+                                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                      {isTH ? 'เขียนรีวิว' : 'Write Review'}
+                                    </button>
+                                  )}
                                 </div>
                               </>
                             )}
