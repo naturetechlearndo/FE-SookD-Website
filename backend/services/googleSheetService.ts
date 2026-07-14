@@ -29,8 +29,7 @@ export async function getSheetData(sheetName: string, noCache = false) {
         if (cached && Date.now() < cached.exp) return cached.data;
     }
 
-    const bust = noCache ? `&t=${Date.now()}` : "";
-    const url = `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true${bust}`;
+    const url = `https://opensheet.elk.sh/${spreadsheetId}/${sheetName}?raw=true`;
     const response = await fetch(url);
     const data = await response.json();
     if (!Array.isArray(data)) throw new Error(`getSheetData: invalid response for sheet "${sheetName}"`);
