@@ -1116,12 +1116,27 @@ export const DISCOVER_CSS = `
   .disc-stagger__text  { grid-column: 1; grid-row: 2; padding: 1.5rem 5%; }
   .disc-stagger__img2  { grid-column: 1; grid-row: 3; min-height: 280px; }
   .disc-activity { grid-template-columns: 1fr; }
+  .disc-activity__left { padding-top: 0; }
+  .disc-act-img-single-wrap { margin-left: 0; }
   .disc-online   { grid-template-columns: 1fr; }
+  .disc-video-wrap { margin-left: 0; }
   .disc-highlights-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Highlight modal mobile */
+  .hlmodal { padding: 1.2rem 1rem 1.5rem; }
+  .hlmodal-main { flex-direction: column; gap: 1rem; }
+  .hlmodal-main-img { width: 100%; max-height: 220px; }
+  .hlmodal-sub { flex-direction: column; gap: .8rem; }
+  .hlmodal-sub-img { width: 100%; max-height: 180px; object-fit: cover; }
+  .hlmodal-sub-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
+
+  /* Game modal mobile */
+  .game-modal { width: 100vw; height: 100dvh; border-radius: 0; }
 }
 @media (max-width: 480px) {
   .disc-tabs { gap: .4rem; }
   .disc-tab { padding: .45rem 1rem; font-size: .82rem; }
+  .disc-highlights-grid { grid-template-columns: repeat(2, 1fr); gap: .8rem; }
 }
 /* ========================================================
    Uncle Storyteller Static (แบบฝังในหน้าเว็บตาม Figma)
