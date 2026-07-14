@@ -1,14 +1,14 @@
 export interface Product {
-    product_id: string;
-    product_name: string;
-    product_price: number;
-    product_quantity: number;
-    product_origin: string;
-    product_note: string;
-    product_image: string;
-    product_preorderDate: string;
-    product_remain: number;
-    product_shipping_duration: string;
-    product_shipping_area: string;
-    product_link: string;
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    origin: string;
+    note: string;
+    image: string;
+    preorderDate: string;
+    remain: number;
+    shipping_duration: string;
+    shipping_area: string;
+    link: string;
 }

@@ -179,7 +179,7 @@ export async function deleteOrder(
 }
 
 export async function getImpactData(
-    req: Request,
+    _req: Request,
     res: Response) {
     try {
         const Impact =

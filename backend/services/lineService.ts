@@ -1,4 +1,4 @@
-import { getOrderById, getOrdersById } from "./orderService";
+import { getOrdersById } from "./orderService";
 export async function replyMessage(replyToken: string, text: string) {
     await fetch("https://api.line.me/v2/bot/message/reply", {
         method: "POST",
