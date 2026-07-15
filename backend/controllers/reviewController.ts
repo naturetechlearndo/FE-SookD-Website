@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as reviewService from "../services/reviewService";
 
 export async function getReviews(
-    req: Request,
+    _req: Request,
     res: Response
 ) {
     try {

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as orderService from "../services/orderService";
 
 export async function getOrders(
-    req: Request,
+    _req: Request,
     res: Response
 ) {
     try {
@@ -113,7 +113,7 @@ export async function getOrdersByUserId(
 }
 
 export async function generateOrderId(
-    req: Request,
+    _req: Request,
     res: Response
 ) {
     try {

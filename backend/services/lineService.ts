@@ -111,7 +111,7 @@ export async function createPaymentLineUrl(orderId: string) {
     }
 
     const total = orders.reduce(
-        (sum, item) => sum + Number(item.total_price),
+        (sum: number, item: any) => sum + Number(item.total_price),
         0
     );
 

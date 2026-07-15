@@ -1,5 +1,5 @@
 import { Review } from "../models/Review";
-import { getSheetData, clearSheetCache, removeFromSheetCache, appendToSheetCache, patchSheetCache } from "./googleSheetService";
+import { getSheetData, removeFromSheetCache, appendToSheetCache, patchSheetCache } from "./googleSheetService";
 
 import { getProducts } from "./productService";
 import { getActivities } from "./activityService";
