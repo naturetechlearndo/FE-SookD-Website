@@ -36,7 +36,7 @@ export async function webhook(
 
                 await replyMessage(
                     event.replyToken,
-                    "กรุณาแนบรูปสลิปได้เลยครับ"
+                    "แนบรูปสลิปได้เลยครับ"
                 );
 
                 // ตอนกดปุ่ม

@@ -44,7 +44,7 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                 },
                                 {
                                     type: "text",
-                                    text: `ยอดรวม ${total} บาท`
+                                    text: `💸 ยอดรวม ${total} บาท`
                                 },
                                 {
                                     type: "text",
@@ -52,11 +52,15 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                 },
                                 {
                                     type: "text",
-                                    text: "ธนาคารกสิกรไทย"
+                                    text: "🏦 ธนาคารกสิกรไทย"
                                 },
                                 {
                                     type: "text",
-                                    text: "ชื่อบัญชี บริษัท เลิร์นดู วิสาหกิจเพื่อสังคม จำกัด"
+                                    text: "ชื่อบัญชี"
+                                },
+                                {
+                                    type: "text",
+                                    text: "บริษัท เลิร์นดู วิสาหกิจเพื่อสังคม จำกัด"
                                 },
                                 {
                                     type: "text",
