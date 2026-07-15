@@ -48,15 +48,15 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                 },
                                 {
                                     type: "text",
-                                    text: `ชำระได้ผ่าน`
+                                    text: `🏦ชำระได้ผ่าน`
                                 },
                                 {
                                     type: "text",
-                                    text: "🏦 ธนาคารกสิกรไทย"
+                                    text: "ธนาคารกสิกรไทย"
                                 },
                                 {
                                     type: "text",
-                                    text: "ชื่อบัญชี"
+                                    text: "ชื่อบัญชี :"
                                 },
                                 {
                                     type: "text",
@@ -64,7 +64,7 @@ export async function replyFirstMessage(replyToken: string, orderId: string, tot
                                 },
                                 {
                                     type: "text",
-                                    text: "เลขบัญชี 1512814456"
+                                    text: "เลขบัญชี : 1512814456"
                                 },
                                 {
                                     type: "text",
