@@ -95,9 +95,15 @@ export async function webhook(
 
                 const text = event.message.text;
 
-                const match = text.match(/Order ID:\s*(ORD\d+)/i);
+                const match = text.match(/ORD\d+/i);
 
-                if (!match) continue;
+                if (!match){
+                    await replyMessage(
+                        event.replyToken,
+                        "สามารถพิมพ์รหัสorderเพื่อชำระเงินได้เลย\nหากข้อความอัตโนมัติไม่ขึ้นสามารถส่งยืนยันการชำระเงินได้โดย\nOrder ID: (รหัสorderของคุณ)\nเช่น\nOrder ID: ORD000\nขอบคุณที่ใช้บริการของเรา"
+                    );
+                    continue;
+                }
 
 
                 const orderId = match[1];

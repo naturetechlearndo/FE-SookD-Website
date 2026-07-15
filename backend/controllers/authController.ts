@@ -197,10 +197,3 @@ export async function getLoginUser(
     }
 
 }
-
-// export async function webhook(req: Request, res: Response) {
-//     console.log("========== LINE WEBHOOK ==========");
-//     console.log(JSON.stringify(req.body, null, 2));
-
-//     res.sendStatus(200);
-// }
