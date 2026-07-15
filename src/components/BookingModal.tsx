@@ -831,14 +831,67 @@ export const BOOKING_MODAL_CSS = `
 .bk__next-btn:hover { background: #1a3d2e; }
 
 @media(max-width: 640px) {
-  .bk__top {         
-        grid-template-columns: 1fr;
-        justify-items: center;
-        text-align: center;}
-  .bk__opt-item { grid-template-columns: 28px 90px 1fr; gap: .6rem; }
+  /* Modal */
+  .bk__modal {
+    padding: 1.2rem 1rem 1rem;
+    border-radius: 14px;
+    width: 96vw;
+    gap: 1rem;
+  }
+  .bk__close { top: .75rem; right: .75rem; }
+
+  /* Step 1 – stack calendar above participants/time */
+  .bk__top {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
   .bk__cal {
-    margin-left: 0cm;
-}
+    margin-left: 0;
+    width: 100%;
+    max-width: 280px;
+    padding: .7rem .75rem;
+  }
+  .bk__right {
+    padding-top: 0;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  /* Optional activities */
+  .bk__opt-title-row { gap: .5rem; flex-wrap: wrap; }
+  .bk__opt-item { grid-template-columns: 28px 80px 1fr; gap: .5rem; }
+  .bk__opt-row2 { gap: .5rem; flex-wrap: wrap; }
+  .bk__opt-time-sel { margin-left: .3rem; }
+  .bk__opt-list { max-height: 260px; }
+
+  /* Footer */
+  .bk__footer-row { flex-wrap: wrap; gap: .6rem; }
+  .bk__total { flex: 1 1 100%; order: -1; text-align: left; font-size: .88rem; }
+  .bk__next-btn { width: 100%; text-align: center; padding: .6rem 1rem; }
+
+  /* Step 2 – Reservation Summary */
+  .bk__sum-title { font-size: 1rem; }
+  .bk__sum-main { flex-direction: column; gap: .9rem; }
+  .bk__sum-img-wrap { width: 100%; max-width: 100%; aspect-ratio: 16/9; }
+  .bk__sum-info { gap: .6rem; }
+  .bk__sum-table { flex-wrap: wrap; gap: .8rem; }
+
+  /* Optional rows in summary */
+  .bk__sum-opt-row { flex-direction: column; gap: .75rem; }
+  .bk__sum-opt-img-wrap { width: 100%; max-width: 100%; aspect-ratio: 16/9; }
+
+  /* Step 2 – Offer section */
+  .bk__offer-item { grid-template-columns: 1fr; }
+  .bk__offer-img-wrap { width: 100%; aspect-ratio: 16/9; }
+  .bk__offer-row2 { gap: .5rem; flex-wrap: wrap; }
+  .bk__offer-price { margin-left: 0; }
+  .bk__offer-list { max-height: none; }
+  .bk__offer-footer { flex-direction: column; }
+  .bk__close-btn, .bk__pay-btn { width: 100%; padding: .6rem 1rem; text-align: center; }
+
+  /* Back button */
+  .bk__back-btn { width: 100%; justify-content: center; }
 }
 
 /* ── Step 2: Reservation Summary ── */
