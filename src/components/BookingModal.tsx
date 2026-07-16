@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { addToCart } from '../utils/cart';
+import { trackEvent } from '../utils/gtag';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '${API_BASE}';
 
@@ -216,11 +217,22 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
   };
   const fmtDate = (d: Date) =>
     `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+ 
+  const handleCloseModal = () => {
+    trackEvent('click_close_modal', {
+      modal_name: 'booking_modal',
+      item_id: activity?.id,
+      item_name: activity?.name
+    });
+    onClose();
+  };
 
   return (
-    <div className="bk__overlay" onClick={onClose}>
+    <div className="bk__overlay" onClick={handleCloseModal}> 
       <div className="bk__modal" ref={modalRef} onClick={e => e.stopPropagation()}>
-        <button className="bk__close" onClick={onClose}>&#x2715;</button>
+        
+        {/* 💡 จุดที่ 2 ปุ่มกากบาท (มุมขวาบน) */}
+        <button className="bk__close" onClick={handleCloseModal}>&#x2715;</button>
 
         {step === 1 && (<>
         {/* ── Top: calendar + right panel ── */}
@@ -566,7 +578,7 @@ export default function BookingModal({ activity, currentUser: _currentUser, onCl
                 })}
               </div>
               <div className="bk__offer-footer">
-                <button className="bk__close-btn" onClick={onClose}>{isTH ? 'ปิด' : 'Close'}</button>
+                <button className="bk__close-btn" onClick={handleCloseModal}>{isTH ? 'ปิด' : 'Close'}</button>
                 <button className="bk__pay-btn" onClick={handleAddToCart}>{isTH ? 'เพิ่มในตะกร้าสินค้า' : 'Add to cart'}</button>
               </div>
             </div>

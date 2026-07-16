@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
+import { trackEvent } from '../utils/gtag';
 
 type DashTab = 'profile' | 'orders' | 'activities' | 'reviews';
 
@@ -506,7 +507,19 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}>
+                      <button className="ud-detail-btn" onClick={() => 
+                        {
+                        trackEvent('select_item', {
+                          item_list_name: 'Order History',
+                          items: [
+                            {
+                              item_id: o.item_id,
+                              item_name: p?.name ?? o.item_id,
+                              price: Number(o.total_price ?? 0)
+                            }
+                          ]
+                        });
+                        onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products')}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> {isTH ? 'รายละเอียด' : 'Detail'}
@@ -540,7 +553,19 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}>
+                      <button className="ud-detail-btn" 
+                      onClick={() => {
+                       trackEvent('select_item', {
+                        item_list_name: 'Activity Reservations',
+                        items: [
+                          {
+                            item_id: o.item_id,
+                            item_name: a?.name ?? o.item_id,
+                            price: Number(o.total_price ?? 0)
+                          }
+                        ]
+                      }); 
+                        onSelectActivity ? onSelectActivity(o.item_id, o) : onNavigate('experiences')}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg> {isTH ? 'รายละเอียด' : 'Detail'}

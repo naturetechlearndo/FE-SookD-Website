@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { getCart, saveCart, CartItem } from '../utils/cart';
 import { api } from '../services/api';
 import { FaLine, FaRegCopy } from "react-icons/fa";
+import { trackEvent } from '../utils/gtag';
 
 interface Props {
   currentUser?: any;
   onNavigate: (page: string) => void;
   lang?: 'TH' | 'ENG';
 }
-
 function driveThumb(url: string, size = 'w400'): string {
   const m = url?.match(/\/d\/([^/]+)\//);
   if (m) {
@@ -127,15 +127,28 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
         setOrderErr(isTH ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Order failed, please try again.');
         return;
       }
-      return;
+      trackEvent('purchase', {
+  transaction_id: orderId, // รหัสออเดอร์
+  value: totalAmount, // ยอดรวมที่ลดราคาแล้ว
+  currency: 'THB', // สกุลเงิน
+  coupon: discountPct > 0 ? memberTier : '', // (Optional) ใส่ชื่อ Tier ถ้ามีการใช้ส่วนลด
+  items: items.map(item => ({
+    item_id: item.itemId,
+    item_name: item.name,
+    price: item.price,
+    quantity: item.qty,
+    item_category: item.itemType // 'product' หรือ 'activity'
+  }))
+});
+return;
 
-    } catch (err) {
-      console.error('Order failed:', err);
-      setLoadingPayment(false);
-      setOrderErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่' : 'Cannot connect to server, please try again.');
-    } finally {
-      setPlacing(false);
-    }
+} catch (err) {
+  console.error('Order failed:', err);
+  setLoadingPayment(false);
+  setOrderErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่' : 'Cannot connect to server, please try again.');
+} finally {
+  setPlacing(false);
+}
   };
 
   const firstName = currentUser?.first_name || '';

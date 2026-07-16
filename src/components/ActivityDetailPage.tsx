@@ -4,6 +4,7 @@ import Footer from './Footer';
 import ContactIcon from './ContactIcon';
 import BookingModal from './BookingModal';
 import { SITE_CONTENT as c } from '../constants/content';
+import { trackEvent } from '../utils/gtag';
 
 const BOOKING_ACTIVITY_IDS = [
   'ACT001', 'ACT002', 'ACT003', 'ACT004',
@@ -302,7 +303,20 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                   if (!isLoggedIn) { setShowLoginModal(true); }
                   else if (userTab === 'legal_entity') { setShowContactModal(true); }
                   else if (BOOKING_ACTIVITY_IDS.includes(normalizeId(activity?.id ?? ''))) { setShowBookingModal(true); }
-                  else { (window as any).gtag?.('event', 'add_to_cart', { item_id: activity?.id, item_name: activity?.name, price: activity?.price, quantity: 1 }); }
+                  else { 
+                    trackEvent('add_to_cart', {
+                      currency: 'THB',
+                      value: Number(activity?.price || 0),
+                      items: [
+                        {
+                          item_id: activity?.id,
+                          item_name: activity?.name,
+                          price: Number(activity?.price || 0),
+                          quantity: 1
+                        }
+                      ]
+                    });             
+                  }
                 }}>{lang === 'TH' ? 'จองกิจกรรม' : 'Reserve a Spot'}</button>
               </>
             )}

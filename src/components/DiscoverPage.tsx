@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
+import { trackEvent } from '../utils/gtag';
 
 interface DiscoverPageProps {
   lang?: 'TH' | 'ENG';
@@ -441,7 +442,13 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
               <button
                 key={p.id}
                 className={`disc-tab${activeTab === i ? ' disc-tab--active' : ''}`}
-                onClick={() => setActiveTab(i)}
+                onClick={() => {setActiveTab(i);
+                  trackEvent('click_category_tag', {
+                    category_name: p.nameEn, // แนะนำให้ดึงชื่อภาษาอังกฤษไปใช้ใน GA4 เพื่อความเป็นระเบียบ
+                    category_id: p.id,
+                    ui_element: 'discover_tab'
+                  });
+                }}
               >
                 {isTH ? p.name : p.nameEn}
               </button>
@@ -651,6 +658,11 @@ export default function DiscoverPage({ lang = 'TH', onNavigate }: DiscoverPagePr
                 const idx = DISCOVER_PLACES.findIndex(x => x.id === p.id);
                 setActiveTab(idx);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                trackEvent('click_category_tag', {
+                  category_name: p.nameEn,
+                  category_id: p.id,
+                  ui_element: 'discover_more_card'
+                });
               }}>
                 <div className="disc-more-card__img-wrap">
                   <img src={driveThumb(p.image, 'w400')} alt={p.name} className="disc-more-card__img"

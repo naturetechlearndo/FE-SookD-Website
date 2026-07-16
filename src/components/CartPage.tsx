@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getCart, saveCart, removeFromCart, CartItem } from '../utils/cart';
+import { trackEvent } from '../utils/gtag';
 
 interface Props {
   currentUser?: any;
@@ -46,6 +47,21 @@ export default function CartPage({ currentUser: _currentUser, onNavigate, lang =
   };
 
   const removeItem = (id: string) => {
+    const itemToRemove = items.find(i => i.id === id);
+    if (itemToRemove) {
+      trackEvent('remove_from_cart', {
+        currency: 'THB',
+        value: itemToRemove.price * itemToRemove.qty,
+        items: [
+          {
+            item_id: itemToRemove.id,
+            item_name: itemToRemove.name,
+            price: itemToRemove.price,
+            quantity: itemToRemove.qty
+          }
+        ]
+      });
+    }
     const next = items.filter(i => i.id !== id);
     setItems(next);
     removeFromCart(id);
@@ -75,6 +91,16 @@ export default function CartPage({ currentUser: _currentUser, onNavigate, lang =
 
   const handlePayNow = () => {
     if (checkedItems.length === 0) return;
+    trackEvent('begin_checkout', {
+      currency: 'THB',
+      value: total,
+      items: checkedItems.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: item.price,
+        quantity: item.qty
+      }))
+    });
     onNavigate('checkout');
   };
 

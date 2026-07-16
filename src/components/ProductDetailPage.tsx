@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 import { addToCart } from '../utils/cart';
+import { trackEvent } from '../utils/gtag'; 
 
 interface Props {
   productId: string;
@@ -261,7 +262,18 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
                       </div>
                       <button className="pdet__cart-btn" onClick={() => {
                         if (!isLoggedIn) { setShowLoginModal(true); return; }
-                        (window as any).gtag?.('event', 'add_to_cart', { item_id: activeProduct?.id, item_name: activeProduct?.name, price: activeProduct?.price, quantity: qty });
+                        trackEvent('add_to_cart', {
+                          currency: 'THB',
+                          value: Number(activeProduct?.price ?? 0) * qty,
+                          items: [
+                            {
+                              item_id: activeProduct?.id,
+                              item_name: activeProduct?.name,
+                              price: Number(activeProduct?.price ?? 0),
+                              quantity: qty
+                            }
+                          ]
+                        });
                         addToCart([{
                           itemId: activeProduct?.id ?? '',
                           itemType: 'product',
@@ -360,7 +372,21 @@ export default function ProductDetailPage({ productId, onBack, onSelectProduct, 
               </button>
               <div className="pdet__others">
                 {others.slice(otherIdx, otherIdx + OTHERS_PER).map((p: any) => (
-                  <div key={p.id} className="pdet__other-card" onClick={() => onSelectProduct?.(p.id)} style={{ cursor: onSelectProduct ? 'pointer' : 'default' }}>
+                  <div key={p.id} className="pdet__other-card" onClick={() => 
+                  {
+                    trackEvent('select_item', {
+                      item_list_name: 'Other Products',
+                      items: [
+                        {
+                          item_id: p.id,
+                          item_name: p.name,
+                          price: Number(p.price ?? 0)
+                        }
+                      ]
+                    });
+                    onSelectProduct?.(p.id);
+                  }} 
+                    style={{ cursor: onSelectProduct ? 'pointer' : 'default' }}>
                     <div className="pdet__other-img-wrap">
                       <img src={driveThumb(p.image, 'w400')} alt={p.name} className="pdet__other-img"
                         loading="lazy"

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 import { api } from '../services/api';
+import { trackEvent } from '../utils/gtag';
 
 interface Activity {
   id: string;
@@ -193,7 +194,23 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
           <>
             <div className="exp-grid">
               {visible.map(a => (
-                <ActivityCard key={a.id} activity={a} lang={lang} isFeatured={featuredIds.includes(a.id)} onClick={() => { (window as any).gtag?.('event', 'select_item', { item_list_name: 'Experiences', item_id: a.id, item_name: a.name }); onSelectActivity(a.id); }} />
+                <ActivityCard 
+                key={a.id} 
+                activity={a} 
+                lang={lang} 
+                isFeatured={featuredIds.includes(a.id)} 
+                onClick={() => {  
+                trackEvent('select_item', { 
+                  item_list_name: 'Experiences', 
+                  items: [
+                    {
+                      item_id: a.id, 
+                      item_name: a.name,
+                      price: Number(a.price)
+                    }
+                  ] 
+                });
+                onSelectActivity(a.id); }} />
               ))}
             </div>
 
@@ -203,7 +220,14 @@ export default function ExperiencesPage({ onSelectActivity, currentUser, lang = 
 
             {filtered.length > VISIBLE_COUNT && (
               <div className="exp-more-wrap">
-                <button className="exp-more-btn" onClick={() => { if (!showAll) (window as any).gtag?.('event', 'click_load_more', { list_name: 'Experiences' }); setShowAll(!showAll); }}>
+                <button className="exp-more-btn" 
+                onClick={() => { 
+                  if (!showAll) {
+                    trackEvent('click_load_more', { 
+                      list_name: 'Experiences' 
+                    });
+                  }
+                  setShowAll(!showAll); }}>
                   {showAll ? 'Show less' : 'See more'}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points={showAll ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
