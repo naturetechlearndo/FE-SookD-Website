@@ -226,7 +226,7 @@ export const SITE_CONTENT: SiteContent = {
           { icon: 'line', label: '@learndo', href: 'https://line.me/R/ti/p/@learndo' },
         ],
       },
-      copyright: 'Copyright © 2026 – VANA. All rights reserved.',
+      copyright: 'Copyright © 2026 – Tramony. All rights reserved.',
     },
     ENG: {
       brand: {
@@ -260,7 +260,7 @@ export const SITE_CONTENT: SiteContent = {
         ],
       },
 
-      copyright: "Copyright © 2026 – VANA. All rights reserved.",
+      copyright: "Copyright © 2026 – Tramony. All rights reserved.",
     },
   },
 };

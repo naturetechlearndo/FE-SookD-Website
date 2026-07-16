@@ -397,8 +397,8 @@ export const ABOUT_CSS = `
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .about__pillars { grid-template-columns: 1fr; }
-  .about__founder-inner { flex-direction: column; }
-  .about__founder-img { width: 100%; height: 260px; }
+  .about__founder-inner { flex-direction: column; align-items: center; }
+  .about__founder-img { width: 100%; max-width: 320px; height: auto; object-fit: contain; }
   .about__location-inner { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
