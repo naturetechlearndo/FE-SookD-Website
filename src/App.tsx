@@ -769,6 +769,7 @@ white-space: pre-line;
 @media(max-width:1024px){
   .journey__cards{gap:1rem}
   .footer__inner{grid-template-columns:1fr 1fr}
+  .footer__logo-col{display:none}
   :root{--section-gap:60px}
 }
 
