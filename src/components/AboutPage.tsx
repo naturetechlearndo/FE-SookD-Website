@@ -67,26 +67,13 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
         <div className="about__founder-inner">
           <img src="/img/pfang.jpg" alt="Founder" className="about__founder-img" />
           <div className="about__founder-content">
-            <div className="about__founder-cv">
-              <h3 className="about__cv-title">{isTH ? 'ประวัติการศึกษา' : 'Education'}</h3>
-              <ul className="about__cv-list">
-                <li>BE, Electrical Engineering — Chulalongkorn University</li>
-                <li>Executive MBA — Sasin School of Management, Chulalongkorn University</li>
-                <li>Doing Business in China — Fudan University, Shanghai, China</li>
-                <li>Finance — Westminster Business School, London, England</li>
-                <li>Digital Business Transformation — Northwestern University, Kellogg School of Management, Chicago, USA</li>
-              </ul>
-
-              <h3 className="about__cv-title">{isTH ? 'ประวัติการทำงาน' : 'Work Experience'}</h3>
-              <ul className="about__cv-list">
-                <li>Process Engineer Manager — Procter and Gamble</li>
-                <li>Material Supply Manager — Procter and Gamble</li>
-                <li>Marketing Director — Hiveground</li>
-                <li>Founder and CEO — Mixberry Co., Ltd</li>
-                <li>Founder and CEO — Mixstep Co., Ltd</li>
-                <li>Founder and CTO — Bearmix Co., Ltd</li>
-              </ul>
-            </div>
+            <blockquote className="about__founder-quote">
+              "ความสุขจากการเดินทางที่แท้จริง<br />คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"
+            </blockquote>
+            <p className="about__founder-name">วรรณเพ็ญ แซ่เปี่ยน – ผู้ก่อตั้ง และ CEO SookD</p>
+            <p className="about__founder-bio">
+              ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ SookD จึงถือกำเนิดขึ้น เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น
+            </p>
           </div>
         </div>
       </section>
