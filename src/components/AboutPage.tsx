@@ -68,11 +68,20 @@ export default function AboutPage({ lang = 'TH' }: { lang?: 'TH' | 'ENG' }) {
           <img src="/img/pfang.jpg" alt="Founder" className="about__founder-img" />
           <div className="about__founder-content">
             <blockquote className="about__founder-quote">
-              "ความสุขจากการเดินทางที่แท้จริง<br />คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"
+              {isTH
+                ? <>"ความสุขจากการเดินทางที่แท้จริง<br />คือการได้เป็นส่วนหนึ่งของการของบริษัท และการได้ค้นพบตัวเองที่เราไปถึงมัน"</>
+                : <>"True happiness in travel<br />is being part of the company's journey and discovering yourself along the way."</>
+              }
             </blockquote>
-            <p className="about__founder-name">วรรณเพ็ญ แซ่เปี่ยน – ผู้ก่อตั้ง และ CEO SookD</p>
+            <p className="about__founder-name">
+              {isTH
+                ? 'วรรณเพ็ญ แซ่เปี่ยน – ผู้ก่อตั้ง และ CEO Tramony'
+                : 'Wannapen Sae-Pian – Founder & CEO, Tramony'}
+            </p>
             <p className="about__founder-bio">
-              ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ SookD จึงถือกำเนิดขึ้น เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น
+              {isTH
+                ? 'ด้วยความเชื่อว่าการท่องเที่ยวที่มีความหมายต้องเริ่มจากการเข้าใจธรรมชาติ Tramony จึงถือกำเนิดขึ้น เพื่อเชื่อมนักเดินทางกับประสบการณ์ที่เปลี่ยนมุมมองและสร้างผลดีต่อชุมชนท้องถิ่น'
+                : 'With the belief that meaningful travel must begin with an understanding of nature, Tramony was founded to connect travelers with experiences that shift perspectives and create positive impact for local communities.'}
             </p>
           </div>
         </div>
