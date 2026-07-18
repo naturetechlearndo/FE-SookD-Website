@@ -116,7 +116,7 @@ export async function webhook(
 
 
                 const total = orders.reduce(
-                    (sum, o) => sum + Number(o.total_price),
+                    (sum: number, o: any) => sum + Number(o.total_price),
                     0
                 );
 

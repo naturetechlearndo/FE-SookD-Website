@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as activityService from "../services/activityService";
 
 export async function getActivities(
-    req: Request,
+    _req: Request,
     res: Response
 ): Promise<void> {
     try {

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as promotionService from "../services/promotionService"
 
 export async function getPromotions(
-    req: Request,
+    _req: Request,
     res: Response
 ): Promise<void> {
     try {
