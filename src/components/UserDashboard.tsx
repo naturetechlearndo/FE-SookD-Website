@@ -675,7 +675,9 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <h2 className="ud-section__title">{isTH ? 'การจองกิจกรรม' : 'Activity Reservations'}</h2>
               <p className="ud-section__sub">{isTH ? 'จัดการการจองกิจกรรมของคุณได้ที่นี่' : 'Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.'}</p>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
-                const sorted = [...activityOrders].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
+                const sorted = [...activityOrders]
+                  .filter(o => o.order_status?.toLowerCase().trim() === 'completed')
+                  .sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
                 if (sorted.length === 0) return <p className="ud-empty">{isTH ? 'ยังไม่มีการจองกิจกรรม' : 'No activity reservations yet'}</p>;
                 const visible = showAllActivities ? sorted : sorted.slice(0, ORDERS_VISIBLE);
                 return <>
