@@ -1060,27 +1060,30 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
         </div>
       )}
 
-      {/* ── Pending payment popup ── */}
+      {/* ── Pending payment popup (same UI as CheckoutPage) ── */}
       {showPendingPay && (
-        <div className="ud-pendpay-overlay" onClick={() => setShowPendingPay(false)}>
-          <div className="ud-pendpay-sheet" onClick={e => e.stopPropagation()}>
-            <h3>{isTH ? 'ชำระเงินผ่าน LINE' : 'Pay via LINE'}</h3>
-            <p>{isTH ? 'กดปุ่มด้านล่างเพื่อชำระเงินผ่าน LINE OA ของเรา' : 'Tap the button below to pay via our LINE OA.'}</p>
-            {pendingPayOrderIds.length > 0 && (
-              <div className="ud-pendpay-ids">
-                <strong>{isTH ? 'หมายเลขคำสั่งซื้อ: ' : 'Order ID(s): '}</strong>
-                {pendingPayOrderIds.join(', ')}
-              </div>
-            )}
-            <a className="ud-pendpay-line-btn" href={pendingPayUrl} target="_blank" rel="noopener noreferrer">
-              <FaLine size={20} /> {isTH ? 'เปิด LINE เพื่อชำระเงิน' : 'Open LINE to Pay'}
-            </a>
-            <button className="ud-pendpay-copy-btn" onClick={() => {
-              navigator.clipboard.writeText(pendingPayOrderIds.join(', ')).catch(() => {});
-            }}>
-              <FaRegCopy size={14} /> {isTH ? 'คัดลอกหมายเลขคำสั่งซื้อ' : 'Copy Order ID(s)'}
-            </button>
-            <button className="ud-pendpay-close" onClick={() => setShowPendingPay(false)}>
+        <div className="payment-popup" onClick={() => setShowPendingPay(false)}>
+          <div className="payment-box" onClick={e => e.stopPropagation()}>
+            <h3>{isTH ? 'กรุณาชำระเงิน' : 'Payment Required'}</h3>
+            <p>{isTH
+              ? 'ส่งรหัส order ด้านล่างผ่าน LINE @226xrnni เพื่อแจ้งชำระเงินผ่าน LINE หรือกดปุ่มด้านล่าง'
+              : 'Send the Order ID below via LINE @226xrnni to confirm your payment, or simply tap the button below.'}</p>
+            <div className="linkBox">
+              <div className="linkBox__text">{pendingPayOrderIds.join(', ')}</div>
+              <button className="linkBox__copy"
+                onClick={() => navigator.clipboard.writeText(pendingPayOrderIds.join(', ')).catch(() => {})}
+                title={isTH ? 'คัดลอก' : 'Copy'}>
+                <FaRegCopy />
+              </button>
+            </div>
+            <div className="payment-actions">
+              <button className="payment-actions__line" onClick={() => window.open(pendingPayUrl, '_blank')}>
+                <FaLine size={22} />
+                <span>{isTH ? 'ชำระเงิน' : 'Pay here'}</span>
+              </button>
+            </div>
+            <button onClick={() => setShowPendingPay(false)}
+              style={{ marginTop: '12px', background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontFamily: 'Kanit,sans-serif', fontSize: '.9rem' }}>
               {isTH ? 'ปิด' : 'Close'}
             </button>
           </div>
@@ -1853,40 +1856,4 @@ export const USER_DASHBOARD_CSS = `
 .ud-pending-bar__btn:hover { background: #05b04a; }
 .ud-pending-bar__btn:disabled { opacity: .6; cursor: default; }
 
-/* ── Pending pay popup ───────────────────── */
-.ud-pendpay-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.45);
-  display: flex; align-items: flex-end; justify-content: center;
-  z-index: 200;
-}
-.ud-pendpay-sheet {
-  background: #fff; border-radius: 20px 20px 0 0;
-  padding: 1.8rem 1.6rem 2.4rem;
-  width: 100%; max-width: 480px;
-}
-.ud-pendpay-sheet h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 .3rem; }
-.ud-pendpay-sheet p  { font-size: .88rem; color: #666; margin: 0 0 1rem; }
-.ud-pendpay-ids {
-  background: #f5f5f5; border-radius: 8px;
-  padding: .7rem .9rem; font-size: .85rem; color: #333;
-  margin-bottom: 1.2rem; word-break: break-all;
-}
-.ud-pendpay-line-btn {
-  display: flex; align-items: center; justify-content: center; gap: .55rem;
-  width: 100%; padding: .9rem; border: none; border-radius: 10px;
-  background: #06c755; color: #fff; font-size: 1rem; font-weight: 700;
-  cursor: pointer; font-family: Kanit, sans-serif; margin-bottom: .7rem;
-  transition: background .2s;
-}
-.ud-pendpay-line-btn:hover { background: #05b04a; }
-.ud-pendpay-copy-btn {
-  display: flex; align-items: center; justify-content: center; gap: .4rem;
-  width: 100%; padding: .65rem; border: 1.5px solid #ccc; border-radius: 10px;
-  background: none; font-size: .9rem; color: #555; cursor: pointer;
-  font-family: Kanit, sans-serif; margin-bottom: .7rem;
-}
-.ud-pendpay-close {
-  width: 100%; padding: .6rem; border: none; background: none;
-  font-size: .9rem; color: #888; cursor: pointer; font-family: Kanit, sans-serif;
-}
 `;
