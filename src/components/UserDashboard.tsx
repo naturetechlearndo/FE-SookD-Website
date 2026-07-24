@@ -259,12 +259,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   }
 
   async function handlePendingPay() {
-    const pendingAll = [
-      ...productOrders.filter(o => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; }),
-      ...activityOrders.filter(o => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; }),
-    ];
-    const selected = pendingAll.filter(o => selectedPendingKeys.has(`${o.order_id}_${o.item_id}`));
-    const uniqueOrderIds = [...new Set(selected.map(o => String(o.order_id)))];
+    const uniqueOrderIds = [...selectedPendingKeys];
     if (uniqueOrderIds.length === 0) return;
     setPendingPayLoading(true);
     try {
@@ -569,45 +564,67 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               </div>
 
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : orderStatusFilter === 'processing' ? (() => {
-                /* ── PENDING PAYMENT: combined products + activities ── */
+                /* ── PENDING PAYMENT: grouped by order_id ── */
                 const isPending = (o: any) => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; };
                 const pendingAll = [
                   ...productOrders.filter(isPending),
                   ...activityOrders.filter(isPending),
-                ].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
-                if (pendingAll.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
+                ];
+                /* group by order_id, sort groups by latest order_date */
+                const groupMap = new Map<string, any[]>();
+                pendingAll.forEach(o => {
+                  const id = String(o.order_id);
+                  if (!groupMap.has(id)) groupMap.set(id, []);
+                  groupMap.get(id)!.push(o);
+                });
+                const groups = [...groupMap.entries()]
+                  .sort((a, b) => toTs(b[1][0].order_date) - toTs(a[1][0].order_date));
+                if (groups.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
                 return (
                   <div style={{ position: 'relative', paddingBottom: selectedPendingKeys.size > 0 ? '80px' : 0 }}>
-                    {pendingAll.map(o => {
-                      const isPrd = String(o.item_id).startsWith('PRD');
-                      const item = isPrd ? getProduct(o.item_id) : getActivity(o.item_id);
-                      const cardKey = `${o.order_id}_${o.item_id}`;
-                      const checked = selectedPendingKeys.has(cardKey);
+                    {groups.map(([orderId, items]) => {
+                      const checked = selectedPendingKeys.has(orderId);
+                      const orderTotal = items.reduce((s: number, o: any) => s + (Number(o.total_price) || 0), 0);
                       return (
-                        <div key={cardKey} className={`ud-card ud-card--selectable${checked ? ' ud-card--checked' : ''}`}
-                          onClick={() => togglePending(cardKey)} style={{ cursor: 'pointer' }}>
-                          <input type="checkbox" className="ud-card__check" checked={checked} readOnly />
-                          <img className="ud-card__img" src={driveImg(item?.image)} alt={item?.name}
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          <div className="ud-card__body">
-                            <h3 className="ud-card__name">{item?.name ?? o.item_id}</h3>
-                            <div className="ud-card__meta">
-                              <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
-                              <span><strong>{isTH ? 'ประเภท' : 'TYPE'}</strong><br />{isPrd ? (isTH ? 'สินค้า' : 'Product') : (isTH ? 'กิจกรรม' : 'Activity')}</span>
-                              <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
+                        <div key={orderId} className={`ud-order-group${checked ? ' ud-order-group--checked' : ''}`}
+                          onClick={() => togglePending(orderId)} style={{ cursor: 'pointer' }}>
+                          <div className="ud-order-group__header">
+                            <div className="ud-order-group__id-row">
+                              <span className="ud-order-group__id">{orderId}</span>
+                              <span className="ud-order-group__date">{fmtDate(items[0].order_date)}</span>
                             </div>
+                            <input type="checkbox" className="ud-card__check" checked={checked} readOnly onClick={e => e.stopPropagation()} />
+                          </div>
+                          {items.map((o: any) => {
+                            const isPrd = String(o.item_id).startsWith('PRD');
+                            const item = isPrd ? getProduct(o.item_id) : getActivity(o.item_id);
+                            return (
+                              <div key={`${o.order_id}_${o.item_id}`} className="ud-order-group__item">
+                                <img className="ud-order-group__img" src={driveImg(item?.image)} alt={item?.name}
+                                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                <div className="ud-order-group__info">
+                                  <span className="ud-order-group__name">{item?.name ?? o.item_id}</span>
+                                  <span className="ud-order-group__type">{isPrd ? (isTH ? 'สินค้า' : 'Product') : (isTH ? 'กิจกรรม' : 'Activity')}</span>
+                                </div>
+                                <span className="ud-order-group__price">{Number(o.total_price).toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
+                              </div>
+                            );
+                          })}
+                          <div className="ud-order-group__footer">
+                            <span>{isTH ? 'ยอดรวม' : 'Total'}</span>
+                            <span className="ud-order-group__total">{orderTotal.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
                           </div>
                         </div>
                       );
                     })}
                     {selectedPendingKeys.size > 0 && (() => {
                       const totalSelected = pendingAll
-                        .filter(o => selectedPendingKeys.has(`${o.order_id}_${o.item_id}`))
+                        .filter(o => selectedPendingKeys.has(String(o.order_id)))
                         .reduce((sum, o) => sum + (Number(o.total_price) || 0), 0);
                       return (
                         <div className="ud-pending-bar">
                           <div className="ud-pending-bar__info">
-                            <span className="ud-pending-bar__count">{isTH ? `เลือก ${selectedPendingKeys.size} รายการ` : `${selectedPendingKeys.size} selected`}</span>
+                            <span className="ud-pending-bar__count">{isTH ? `เลือก ${selectedPendingKeys.size} order` : `${selectedPendingKeys.size} order(s)`}</span>
                             <span className="ud-pending-bar__total">{totalSelected.toLocaleString()} {isTH ? 'บาท' : 'Baht'}</span>
                           </div>
                           <button className="ud-pending-bar__btn" onClick={e => { e.stopPropagation(); handlePendingPay(); }} disabled={pendingPayLoading}>
@@ -1815,15 +1832,66 @@ export const USER_DASHBOARD_CSS = `
 /* ── Pending payment checkboxes ─────────── */
 .ud-card--selectable { position: relative; }
 .ud-card__check {
-  position: absolute; top: 50%; right: .9rem;
-  transform: translateY(-50%);
   width: 18px; height: 18px; cursor: pointer;
-  accent-color: #2d6a4f;
+  accent-color: #2d6a4f; flex-shrink: 0;
 }
 .ud-card--checked {
   border: 2px solid #2d6a4f !important;
   background: #f0faf5;
 }
+
+/* ── Order group card (pending view) ────── */
+.ud-order-group {
+  background: #fff; border-radius: 14px;
+  border: 2px solid #e0e0e0;
+  margin-bottom: 1rem; overflow: hidden;
+  transition: border-color .2s, background .2s;
+  user-select: none;
+}
+.ud-order-group--checked {
+  border-color: #2d6a4f;
+  background: #f0faf5;
+}
+.ud-order-group__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .75rem 1rem;
+  background: #f7f9f7;
+  border-bottom: 1px solid #e8e8e8;
+}
+.ud-order-group--checked .ud-order-group__header {
+  background: #e2f4eb;
+}
+.ud-order-group__id-row { display: flex; align-items: center; gap: .75rem; }
+.ud-order-group__id { font-weight: 700; font-size: .95rem; color: #1a3f2b; }
+.ud-order-group__date { font-size: .82rem; color: #888; }
+.ud-order-group__item {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ud-order-group__item:last-of-type { border-bottom: none; }
+.ud-order-group__img {
+  width: 52px; height: 52px; border-radius: 8px;
+  object-fit: cover; flex-shrink: 0; background: #e8f0eb;
+}
+.ud-order-group__info {
+  flex: 1; display: flex; flex-direction: column; gap: .15rem; min-width: 0;
+}
+.ud-order-group__name {
+  font-size: .9rem; font-weight: 600; color: #111;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ud-order-group__type { font-size: .78rem; color: #888; }
+.ud-order-group__price { font-size: .9rem; font-weight: 600; color: #333; flex-shrink: 0; }
+.ud-order-group__footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .6rem 1rem;
+  background: #f7f9f7;
+  border-top: 1px solid #e8e8e8;
+}
+.ud-order-group--checked .ud-order-group__footer { background: #e2f4eb; }
+.ud-order-group__footer span:first-child { font-size: .85rem; color: #666; }
+.ud-order-group__total { font-size: 1rem; font-weight: 700; color: #1a3f2b; }
 
 /* ── Pending payment bottom bar ─────────── */
 .ud-pending-bar {
