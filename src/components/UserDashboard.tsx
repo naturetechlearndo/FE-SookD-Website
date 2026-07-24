@@ -158,6 +158,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
 
   /* pending payment selection */
   const [selectedPendingKeys, setSelectedPendingKeys] = useState<Set<string>>(new Set());
+  const [dismissedOrderIds, setDismissedOrderIds] = useState<Set<string>>(new Set());
   const [showPendingPay, setShowPendingPay] = useState(false);
   const [pendingPayLoading, setPendingPayLoading] = useState(false);
   const [pendingPayUrl, setPendingPayUrl] = useState('');
@@ -557,7 +558,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <div className="ud-order-filterbar">
                 {(['all', 'processing', 'completed'] as const).map(s => (
                   <button key={s} className={`ud-order-filter-btn${orderStatusFilter === s ? ' active' : ''}`}
-                    onClick={() => { setOrderStatusFilter(s); setSelectedPendingKeys(new Set()); }}>
+                    onClick={() => { setOrderStatusFilter(s); setSelectedPendingKeys(new Set()); setDismissedOrderIds(new Set()); }}>
                     {s === 'all' ? (isTH ? 'ทั้งหมด' : 'All') : s === 'processing' ? (isTH ? 'รอชำระเงิน' : 'Payment Pending') : (isTH ? 'เสร็จสิ้น' : 'Completed')}
                   </button>
                 ))}
@@ -578,7 +579,8 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                   groupMap.get(id)!.push(o);
                 });
                 const groups = [...groupMap.entries()]
-                  .sort((a, b) => toTs(b[1][0].order_date) - toTs(a[1][0].order_date));
+                  .sort((a, b) => toTs(b[1][0].order_date) - toTs(a[1][0].order_date))
+                  .filter(([orderId]) => !dismissedOrderIds.has(orderId));
                 if (groups.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
                 return (
                   <div style={{ position: 'relative', paddingBottom: selectedPendingKeys.size > 0 ? '80px' : 0 }}>
@@ -593,7 +595,15 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                               <span className="ud-order-group__id">{orderId}</span>
                               <span className="ud-order-group__date">{fmtDate(items[0].order_date)}</span>
                             </div>
-                            <input type="checkbox" className="ud-card__check" checked={checked} readOnly onClick={e => e.stopPropagation()} />
+                            <button className="ud-order-group__trash" onClick={e => {
+                              e.stopPropagation();
+                              setDismissedOrderIds(prev => new Set([...prev, orderId]));
+                              setSelectedPendingKeys(prev => { const n = new Set(prev); n.delete(orderId); return n; });
+                            }} title={isTH ? 'ซ่อน' : 'Dismiss'}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                              </svg>
+                            </button>
                           </div>
                           {items.map((o: any) => {
                             const isPrd = String(o.item_id).startsWith('PRD');
@@ -1892,6 +1902,14 @@ export const USER_DASHBOARD_CSS = `
 .ud-order-group--checked .ud-order-group__footer { background: #e2f4eb; }
 .ud-order-group__footer span:first-child { font-size: .85rem; color: #666; }
 .ud-order-group__total { font-size: 1rem; font-weight: 700; color: #1a3f2b; }
+.ud-order-group__trash {
+  background: none; border: none; cursor: pointer;
+  color: #bbb; padding: .3rem; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.ud-order-group__trash:hover { color: #e53935; background: #fff0f0; }
 
 /* ── Pending payment bottom bar ─────────── */
 .ud-pending-bar {
