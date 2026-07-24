@@ -105,15 +105,10 @@ function fmtOrderDate(d: any) {
   return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
 }
 
-const ORDER_STATUS_MAP: Record<string, [string, string]> = {
-  completed: ['Completed', '#2d6a4f'],
-  paid:      ['Paid',      '#1a6b8a'],
-  shipped:   ['Shipped',   '#5a3e8a'],
-  pending:   ['Pending',   '#b07d0a'],
-  cancelled: ['Cancelled', '#b03a2e'],
-};
-function OrderStatusBadge({ s }: { s: string }) {
-  const [label, color] = ORDER_STATUS_MAP[s?.toLowerCase()] ?? [s ?? '-', '#555'];
+function OrderStatusBadge({ s, lang = 'TH' }: { s: string; lang?: 'TH' | 'ENG' }) {
+  const isCompleted = s?.toLowerCase().trim() === 'completed';
+  const label = isCompleted ? (lang === 'TH' ? 'เสร็จสิ้น' : 'Completed') : (lang === 'TH' ? 'รอชำระเงิน' : 'Payment Pending');
+  const color = isCompleted ? '#2d6a4f' : '#b07d0a';
   return <span style={{ color, fontWeight: 600 }}>{label}</span>;
 }
 
@@ -231,7 +226,7 @@ export default function ActivityDetailPage({ activityId, onBack, orderData, curr
                   <div className="pdet__order-divider" />
                   <div className="pdet__order-col">
                     <span className="pdet__order-label">Status</span>
-                    <OrderStatusBadge s={orderData.order_status} />
+                    <OrderStatusBadge s={orderData.order_status} lang={lang} />
                   </div>
                   {activity.date && (
                     <>

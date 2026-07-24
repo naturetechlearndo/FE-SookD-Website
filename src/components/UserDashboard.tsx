@@ -28,6 +28,11 @@ function driveImg(src: string) {
   return `https://res.cloudinary.com/zgor0mh6/image/fetch/w_200,q_auto,f_auto/${driveUrl}`;
 }
 
+function toTs(d: any): number {
+  const n = Number(d);
+  return (!isNaN(n) && n > 1000) ? (n - 25569) * 86400 * 1000 : new Date(d).getTime() || 0;
+}
+
 function fmtDate(d: string | Date | number) {
   if (d === '' || d === null || d === undefined) return '-';
   try {
@@ -48,15 +53,18 @@ function fmtDate(d: string | Date | number) {
 }
 
 const STATUS_MAP: Record<string, [string, string]> = {
-  completed: ['Completed', '#2d6a4f'],
-  paid: ['Paid', '#1a6b8a'],
-  shipped: ['Shipped', '#5a3e8a'],
-  pending: ['Pending', '#b07d0a'],
-  cancelled: ['Cancelled', '#b03a2e'],
+  completed:  ['Completed',  '#2d6a4f'],
+  paid:       ['Paid',       '#1a6b8a'],
+  shipped:    ['Shipped',    '#5a3e8a'],
+  pending:    ['Pending',    '#b07d0a'],
+  cancelled:  ['Cancelled',  '#b03a2e'],
+  processing: ['Processing', '#b07d0a'],
 };
 
-function StatusBadge({ s }: { s: string }) {
-  const [label, color] = STATUS_MAP[s?.toLowerCase()] ?? [s ?? '-', '#555'];
+function StatusBadge({ s, isTH }: { s: string; isTH: boolean }) {
+  const isCompleted = s?.toLowerCase().trim() === 'completed';
+  const label = isCompleted ? (isTH ? 'เสร็จสิ้น' : 'Completed') : (isTH ? 'รอชำระเงิน' : 'Payment Pending');
+  const color = isCompleted ? '#2d6a4f' : '#b07d0a';
   return <span style={{ color, fontWeight: 600, fontSize: '.88rem' }}>{label}</span>;
 }
 
@@ -201,9 +209,18 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   /* tab data */
   useEffect(() => {
     if (!user?.user_id) return;
+    const dedup = (ords: any[]) => {
+      const seen = new Set<string>();
+      return ords.filter(o => {
+        const key = String(o.order_id);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
     if (tab === 'orders' || tab === 'activities') {
       setLoading(true);
-      api.orders.getByUserId(user.user_id).then(setOrders).catch(() => []).finally(() => setLoading(false));
+      api.orders.getByUserId(user.user_id).then(o => setOrders(dedup(o))).catch(() => []).finally(() => setLoading(false));
     }
     if (tab === 'reviews') {
       setLoading(true);
@@ -211,7 +228,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
       Promise.all([
         api.orders.getByUserId(user.user_id),
         api.reviews.getByUserId(user.user_id),
-      ]).then(([ords, revs]) => { setOrders(ords); setReviews(revs); })
+      ]).then(([ords, revs]) => { setOrders(dedup(ords)); setReviews(revs); })
         .catch(() => {}).finally(() => { setLoading(false); setReviewsReady(true); });
     }
   }, [tab, user?.user_id]);
@@ -244,16 +261,30 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   /* ── handlers ── */
   async function doDelete() {
     if (!deleteId) return;
+    setReviews(prev => prev.filter(r => r.review_id !== deleteId));
     try { await api.reviews.delete(deleteId); } catch { }
     afterReviewAction();
   }
 
   async function doSave(reviewId: string) {
+    setReviews(prev => prev.map(r =>
+      r.review_id === reviewId ? { ...r, rating: editRating, comment: editText } : r
+    ));
     try { await api.reviews.update(reviewId, { rating: editRating, comment: editText }); } catch { }
     afterReviewAction();
   }
 
   async function doCreate(itemId: string) {
+    const newReview = {
+      review_id: `temp_${Date.now()}`,
+      user_id: user.user_id,
+      user_name: displayName,
+      item_id: itemId,
+      rating: editRating,
+      comment: editText,
+      review_date: new Date().toISOString().slice(0, 10),
+    };
+    setReviews(prev => [...prev, newReview]);
     try {
       await api.reviews.create({
         user_id: user.user_id,
@@ -500,14 +531,21 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <div className="ud-order-filterbar">
                 {(['all', 'processing', 'completed'] as const).map(s => (
                   <button key={s} className={`ud-order-filter-btn${orderStatusFilter === s ? ' active' : ''}`} onClick={() => setOrderStatusFilter(s)}>
-                    {s === 'all' ? (isTH ? 'ทั้งหมด' : 'All') : s === 'processing' ? (isTH ? 'กำลังจัดส่ง' : 'Processing') : (isTH ? 'สำเร็จ' : 'Completed')}
+                    {s === 'all' ? (isTH ? 'ทั้งหมด' : 'All') : s === 'processing' ? (isTH ? 'รอชำระเงิน' : 'Payment Pending') : (isTH ? 'เสร็จสิ้น' : 'Completed')}
                   </button>
                 ))}
               </div>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
-                const filtered = productOrders.filter(o => orderStatusFilter === 'all' || o.order_status?.toLowerCase() === orderStatusFilter);
+                const filtered = productOrders.filter(o => {
+                  if (orderStatusFilter === 'all') return true;
+                  const s = o.order_status?.toLowerCase().trim() ?? '';
+                  if (orderStatusFilter === 'completed') return s === 'completed';
+                  if (orderStatusFilter === 'processing') return s !== 'completed' && s !== 'cancelled' && s !== '';
+                  return s === orderStatusFilter;
+                });
                 if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีคำสั่งซื้อในหมวดนี้' : 'No orders in this category'}</p>;
-                const visible = showAllOrders ? filtered : filtered.slice(0, ORDERS_VISIBLE);
+                const sortedOrders = [...filtered].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
+                const visible = showAllOrders ? sortedOrders : sortedOrders.slice(0, ORDERS_VISIBLE);
                 return <>
                   {visible.map(o => {
                   const p = getProduct(o.item_id);
@@ -519,7 +557,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                         <h3 className="ud-card__name">{p?.name ?? o.item_id}</h3>
                         <div className="ud-card__meta">
                           <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
-                          <span><strong>{isTH ? 'สถานะ' : 'STATUS'}</strong><br /><StatusBadge s={o.order_status} /></span>
+                          <span><strong>{isTH ? 'สถานะ' : 'STATUS'}</strong><br /><StatusBadge s={o.order_status} isTH={isTH} /></span>
                           <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
                         </div>
                       </div>
@@ -558,7 +596,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <h2 className="ud-section__title">{isTH ? 'การจองกิจกรรม' : 'Activity Reservations'}</h2>
               <p className="ud-section__sub">{isTH ? 'จัดการการจองกิจกรรมของคุณได้ที่นี่' : 'Anticipate your upcoming eco-experiences. Seamlessly manage your mindful itineraries.'}</p>
               {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
-                const sorted = [...activityOrders].sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime());
+                const sorted = [...activityOrders].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
                 if (sorted.length === 0) return <p className="ud-empty">{isTH ? 'ยังไม่มีการจองกิจกรรม' : 'No activity reservations yet'}</p>;
                 const visible = showAllActivities ? sorted : sorted.slice(0, ORDERS_VISIBLE);
                 return <>
@@ -657,18 +695,16 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                     .filter(o => { if (seenItemIds.has(o.item_id)) return false; seenItemIds.add(o.item_id); return true; })
                     .map(o => ({ order: o, review: reviews.find(r => r.item_id === o.item_id) ?? null }));
 
+                  const filterDateFmt = (() => {
+                    if (!reviewDateFilter) return '';
+                    const [yyyy, mm, dd] = reviewDateFilter.split('-');
+                    return `${dd}/${mm}/${yyyy}`;
+                  })();
                   const filtered = mergedItems.filter(({ order, review: _review }) => {
                     const isPrd = String(order.item_id).startsWith('PRD');
                     if (reviewTypeFilter === 'product' && !isPrd) return false;
                     if (reviewTypeFilter === 'activity' && isPrd) return false;
-                    if (reviewDateFilter) {
-                      const n = Number(order.order_date);
-                      const d = !isNaN(n) && n > 1000
-                        ? new Date((n - 25569) * 86400 * 1000)
-                        : new Date(order.order_date);
-                      const iso = isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
-                      if (iso !== reviewDateFilter) return false;
-                    }
+                    if (filterDateFmt && fmtDate(order.order_date) !== filterDateFmt) return false;
                     return true;
                   });
 

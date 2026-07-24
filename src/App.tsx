@@ -94,9 +94,10 @@ export default function App() {
     setCartCount(getCart().length);
   }
 
-  function openActivity(id: string) {
+  function openActivity(id: string, from: Page = 'experiences') {
     setSelectedActivityId(id);
-    window.history.pushState({ page: 'activity-detail', activityId: id }, '');
+    setPrevPage(from);
+    window.history.pushState({ page: 'activity-detail', activityId: id, prevPage: from }, '');
     setPage('activity-detail');
   }
 
@@ -118,7 +119,8 @@ export default function App() {
   function openActivityFromOrder(activityId: string, order: any) {
     setOrderData(order);
     setSelectedActivityId(activityId);
-    window.history.pushState({ page: 'activity-detail', activityId }, '');
+    setPrevPage('profile');
+    window.history.pushState({ page: 'activity-detail', activityId, prevPage: 'profile' }, '');
     setPage('activity-detail');
   }
 

@@ -116,8 +116,12 @@ export default function CheckoutPage({ currentUser, onNavigate, lang = 'TH' }: P
 
 
       setPaymentUrl(payment);
-
       setOrderID(orderId);
+
+      // ล้าง cart ทันทีที่ order สร้างสำเร็จ
+      const all = getCart();
+      const checkedIds = new Set(items.map(i => i.id));
+      saveCart(all.filter(i => !checkedIds.has(i.id)));
 
       setLoadingPayment(false);
 
@@ -323,11 +327,6 @@ return;
                   className="payment-actions__line"
                   onClick={() => {
                     window.open(paymentUrl, "_blank");
-
-                    const all = getCart();
-                    const checkedIds = new Set(items.map(i => i.id));
-                    saveCart(all.filter(i => !checkedIds.has(i.id)));
-
                     onNavigate('home');
                   }}
                 >
