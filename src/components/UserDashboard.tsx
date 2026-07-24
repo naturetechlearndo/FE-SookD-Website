@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 import { trackEvent } from '../utils/gtag';
+import { FaLine, FaRegCopy } from 'react-icons/fa';
 
 type DashTab = 'profile' | 'orders' | 'activities' | 'reviews';
 
@@ -52,14 +53,7 @@ function fmtDate(d: string | Date | number) {
   } catch { return String(d); }
 }
 
-const STATUS_MAP: Record<string, [string, string]> = {
-  completed:  ['Completed',  '#2d6a4f'],
-  paid:       ['Paid',       '#1a6b8a'],
-  shipped:    ['Shipped',    '#5a3e8a'],
-  pending:    ['Pending',    '#b07d0a'],
-  cancelled:  ['Cancelled',  '#b03a2e'],
-  processing: ['Processing', '#b07d0a'],
-};
+
 
 function StatusBadge({ s, isTH }: { s: string; isTH: boolean }) {
   const isCompleted = s?.toLowerCase().trim() === 'completed';
@@ -162,6 +156,13 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   const [showAllActivities, setShowAllActivities] = useState(false);
   const ORDERS_VISIBLE = 5;
 
+  /* pending payment selection */
+  const [selectedPendingKeys, setSelectedPendingKeys] = useState<Set<string>>(new Set());
+  const [showPendingPay, setShowPendingPay] = useState(false);
+  const [pendingPayLoading, setPendingPayLoading] = useState(false);
+  const [pendingPayUrl, setPendingPayUrl] = useState('');
+  const [pendingPayOrderIds, setPendingPayOrderIds] = useState<string[]>([]);
+
   /* review filter state */
   const [reviewTypeFilter, setReviewTypeFilter] = useState<'all' | 'product' | 'activity'>('all');
   const [reviewDateFilter, setReviewDateFilter] = useState('');
@@ -212,7 +213,7 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
     const dedup = (ords: any[]) => {
       const seen = new Set<string>();
       return ords.filter(o => {
-        const key = String(o.order_id);
+        const key = `${o.order_id}_${o.item_id}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -247,6 +248,36 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
   };
   const productOrders = orders.filter(o => !!getProduct(o.item_id));
   const activityOrders = orders.filter(o => !!getActivity(o.item_id));
+
+  /* ── pending payment ── */
+  function togglePending(key: string) {
+    setSelectedPendingKeys(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  async function handlePendingPay() {
+    const pendingAll = [
+      ...productOrders.filter(o => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; }),
+      ...activityOrders.filter(o => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; }),
+    ];
+    const selected = pendingAll.filter(o => selectedPendingKeys.has(`${o.order_id}_${o.item_id}`));
+    const uniqueOrderIds = [...new Set(selected.map(o => String(o.order_id)))];
+    if (uniqueOrderIds.length === 0) return;
+    setPendingPayLoading(true);
+    try {
+      const url = await api.line.payment({ order_id: uniqueOrderIds[0] });
+      setPendingPayUrl(typeof url === 'string' ? url : 'https://line.me/ti/p/@226xrnni');
+    } catch {
+      setPendingPayUrl('https://line.me/ti/p/@226xrnni');
+    } finally {
+      setPendingPayOrderIds(uniqueOrderIds);
+      setShowPendingPay(true);
+      setPendingPayLoading(false);
+    }
+  }
 
   /* ── helpers ── */
   function afterReviewAction() {
@@ -530,17 +561,60 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
               <p className="ud-section__sub">{isTH ? 'ติดตามสินค้าของคุณ ทุกชิ้นดูแลด้วยใจใส่ใจ' : 'Monitor your recent acquisitions. Every piece is handled with care for you and nature.'}</p>
               <div className="ud-order-filterbar">
                 {(['all', 'processing', 'completed'] as const).map(s => (
-                  <button key={s} className={`ud-order-filter-btn${orderStatusFilter === s ? ' active' : ''}`} onClick={() => setOrderStatusFilter(s)}>
+                  <button key={s} className={`ud-order-filter-btn${orderStatusFilter === s ? ' active' : ''}`}
+                    onClick={() => { setOrderStatusFilter(s); setSelectedPendingKeys(new Set()); }}>
                     {s === 'all' ? (isTH ? 'ทั้งหมด' : 'All') : s === 'processing' ? (isTH ? 'รอชำระเงิน' : 'Payment Pending') : (isTH ? 'เสร็จสิ้น' : 'Completed')}
                   </button>
                 ))}
               </div>
-              {loading ? <p className="ud-loading">กำลังโหลด...</p> : (() => {
+
+              {loading ? <p className="ud-loading">กำลังโหลด...</p> : orderStatusFilter === 'processing' ? (() => {
+                /* ── PENDING PAYMENT: combined products + activities ── */
+                const isPending = (o: any) => { const s = o.order_status?.toLowerCase().trim() ?? ''; return s !== 'completed' && s !== 'cancelled' && s !== ''; };
+                const pendingAll = [
+                  ...productOrders.filter(isPending),
+                  ...activityOrders.filter(isPending),
+                ].sort((a, b) => toTs(b.order_date) - toTs(a.order_date));
+                if (pendingAll.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีรายการรอชำระเงิน' : 'No pending payments'}</p>;
+                return (
+                  <div style={{ position: 'relative', paddingBottom: selectedPendingKeys.size > 0 ? '80px' : 0 }}>
+                    {pendingAll.map(o => {
+                      const isPrd = String(o.item_id).startsWith('PRD');
+                      const item = isPrd ? getProduct(o.item_id) : getActivity(o.item_id);
+                      const cardKey = `${o.order_id}_${o.item_id}`;
+                      const checked = selectedPendingKeys.has(cardKey);
+                      return (
+                        <div key={cardKey} className={`ud-card ud-card--selectable${checked ? ' ud-card--checked' : ''}`}
+                          onClick={() => togglePending(cardKey)} style={{ cursor: 'pointer' }}>
+                          <input type="checkbox" className="ud-card__check" checked={checked} readOnly />
+                          <img className="ud-card__img" src={driveImg(item?.image)} alt={item?.name}
+                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          <div className="ud-card__body">
+                            <h3 className="ud-card__name">{item?.name ?? o.item_id}</h3>
+                            <div className="ud-card__meta">
+                              <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
+                              <span><strong>{isTH ? 'ประเภท' : 'TYPE'}</strong><br />{isPrd ? (isTH ? 'สินค้า' : 'Product') : (isTH ? 'กิจกรรม' : 'Activity')}</span>
+                              <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {selectedPendingKeys.size > 0 && (
+                      <div className="ud-pending-bar">
+                        <span className="ud-pending-bar__count">{isTH ? `เลือก ${selectedPendingKeys.size} รายการ` : `${selectedPendingKeys.size} selected`}</span>
+                        <button className="ud-pending-bar__btn" onClick={e => { e.stopPropagation(); handlePendingPay(); }} disabled={pendingPayLoading}>
+                          {pendingPayLoading ? '...' : (isTH ? 'ชำระเงิน' : 'Pay Now')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })() : (() => {
+                /* ── NORMAL ORDERS (all / completed) ── */
                 const filtered = productOrders.filter(o => {
                   if (orderStatusFilter === 'all') return true;
                   const s = o.order_status?.toLowerCase().trim() ?? '';
-                  if (orderStatusFilter === 'completed') return s === 'completed';
-                  if (orderStatusFilter === 'processing') return s !== 'completed' && s !== 'cancelled' && s !== '';
                   return s === orderStatusFilter;
                 });
                 if (filtered.length === 0) return <p className="ud-empty">{isTH ? 'ไม่มีคำสั่งซื้อในหมวดนี้' : 'No orders in this category'}</p>;
@@ -548,34 +622,31 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 const visible = showAllOrders ? sortedOrders : sortedOrders.slice(0, ORDERS_VISIBLE);
                 return <>
                   {visible.map(o => {
-                  const p = getProduct(o.item_id);
-                  return (
-                    <div key={o.order_id} className="ud-card">
-                      <img className="ud-card__img" src={driveImg(p?.image)} alt={p?.name}
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div className="ud-card__body">
-                        <h3 className="ud-card__name">{p?.name ?? o.item_id}</h3>
-                        <div className="ud-card__meta">
-                          <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
-                          <span><strong>{isTH ? 'สถานะ' : 'STATUS'}</strong><br /><StatusBadge s={o.order_status} isTH={isTH} /></span>
-                          <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
+                    const p = getProduct(o.item_id);
+                    return (
+                      <div key={`${o.order_id}_${o.item_id}`} className="ud-card">
+                        <img className="ud-card__img" src={driveImg(p?.image)} alt={p?.name}
+                          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <div className="ud-card__body">
+                          <h3 className="ud-card__name">{p?.name ?? o.item_id}</h3>
+                          <div className="ud-card__meta">
+                            <span><strong>{isTH ? 'วันที่' : 'DATE'}</strong><br />{fmtDate(o.order_date)}</span>
+                            <span><strong>{isTH ? 'สถานะ' : 'STATUS'}</strong><br /><StatusBadge s={o.order_status} isTH={isTH} /></span>
+                            <span><strong>{isTH ? 'รวม' : 'TOTAL'}</strong><br />{o.total_price} {isTH ? 'บาท' : 'Baht'}</span>
+                          </div>
                         </div>
+                        <button className="ud-detail-btn" onClick={() => {
+                          trackEvent('select_item', { item_list_name: 'Order History', items: [{ item_id: o.item_id, item_name: p?.name ?? o.item_id, price: Number(o.total_price ?? 0) }] });
+                          onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products');
+                        }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                          </svg> {isTH ? 'รายละเอียด' : 'Detail'}
+                        </button>
                       </div>
-                      <button className="ud-detail-btn" onClick={() => {
-                        trackEvent('select_item', {
-                          item_list_name: 'Order History',
-                          items: [{ item_id: o.item_id, item_name: p?.name ?? o.item_id, price: Number(o.total_price ?? 0) }]
-                        });
-                        onSelectProduct ? onSelectProduct(o.item_id, o) : onNavigate('products');
-                      }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                        </svg> {isTH ? 'รายละเอียด' : 'Detail'}
-                      </button>
-                    </div>
-                  );
-                })}
-                  {filtered.length > ORDERS_VISIBLE && (
+                    );
+                  })}
+                  {sortedOrders.length > ORDERS_VISIBLE && (
                     <div className="ud-more-wrap">
                       <button className="ud-more-btn" onClick={() => setShowAllOrders(v => !v)}>
                         {showAllOrders ? (isTH ? 'ย่อ' : 'Show less') : (isTH ? 'ดูทั้งหมด' : 'See more')}
@@ -977,6 +1048,33 @@ export default function UserDashboard({ user, onNavigate, onUserUpdate, onSelect
                 {isTH ? 'ยกเลิก' : 'Cancel'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pending payment popup ── */}
+      {showPendingPay && (
+        <div className="ud-pendpay-overlay" onClick={() => setShowPendingPay(false)}>
+          <div className="ud-pendpay-sheet" onClick={e => e.stopPropagation()}>
+            <h3>{isTH ? 'ชำระเงินผ่าน LINE' : 'Pay via LINE'}</h3>
+            <p>{isTH ? 'กดปุ่มด้านล่างเพื่อชำระเงินผ่าน LINE OA ของเรา' : 'Tap the button below to pay via our LINE OA.'}</p>
+            {pendingPayOrderIds.length > 0 && (
+              <div className="ud-pendpay-ids">
+                <strong>{isTH ? 'หมายเลขคำสั่งซื้อ: ' : 'Order ID(s): '}</strong>
+                {pendingPayOrderIds.join(', ')}
+              </div>
+            )}
+            <a className="ud-pendpay-line-btn" href={pendingPayUrl} target="_blank" rel="noopener noreferrer">
+              <FaLine size={20} /> {isTH ? 'เปิด LINE เพื่อชำระเงิน' : 'Open LINE to Pay'}
+            </a>
+            <button className="ud-pendpay-copy-btn" onClick={() => {
+              navigator.clipboard.writeText(pendingPayOrderIds.join(', ')).catch(() => {});
+            }}>
+              <FaRegCopy size={14} /> {isTH ? 'คัดลอกหมายเลขคำสั่งซื้อ' : 'Copy Order ID(s)'}
+            </button>
+            <button className="ud-pendpay-close" onClick={() => setShowPendingPay(false)}>
+              {isTH ? 'ปิด' : 'Close'}
+            </button>
           </div>
         </div>
       )}
@@ -1699,5 +1797,76 @@ export const USER_DASHBOARD_CSS = `
     flex-direction: column;
   }
 
+}
+
+/* ── Pending payment checkboxes ─────────── */
+.ud-card--selectable { position: relative; }
+.ud-card__check {
+  position: absolute; top: 50%; right: .9rem;
+  transform: translateY(-50%);
+  width: 18px; height: 18px; cursor: pointer;
+  accent-color: #2d6a4f;
+}
+.ud-card--checked {
+  border: 2px solid #2d6a4f !important;
+  background: #f0faf5;
+}
+
+/* ── Pending payment bottom bar ─────────── */
+.ud-pending-bar {
+  position: sticky; bottom: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border-top: 2px solid #2d6a4f;
+  padding: .9rem 1.2rem;
+  box-shadow: 0 -2px 12px rgba(0,0,0,.1);
+  z-index: 50; border-radius: 0 0 12px 12px;
+  margin-top: .5rem;
+}
+.ud-pending-bar__count { font-size: .95rem; font-weight: 600; color: #2d6a4f; }
+.ud-pending-bar__btn {
+  background: #06c755; color: #fff;
+  border: none; border-radius: 8px;
+  padding: .55rem 1.4rem; font-size: .95rem; font-weight: 700;
+  cursor: pointer; font-family: Kanit, sans-serif;
+  transition: background .2s;
+}
+.ud-pending-bar__btn:hover { background: #05b04a; }
+.ud-pending-bar__btn:disabled { opacity: .6; cursor: default; }
+
+/* ── Pending pay popup ───────────────────── */
+.ud-pendpay-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 200;
+}
+.ud-pendpay-sheet {
+  background: #fff; border-radius: 20px 20px 0 0;
+  padding: 1.8rem 1.6rem 2.4rem;
+  width: 100%; max-width: 480px;
+}
+.ud-pendpay-sheet h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 .3rem; }
+.ud-pendpay-sheet p  { font-size: .88rem; color: #666; margin: 0 0 1rem; }
+.ud-pendpay-ids {
+  background: #f5f5f5; border-radius: 8px;
+  padding: .7rem .9rem; font-size: .85rem; color: #333;
+  margin-bottom: 1.2rem; word-break: break-all;
+}
+.ud-pendpay-line-btn {
+  display: flex; align-items: center; justify-content: center; gap: .55rem;
+  width: 100%; padding: .9rem; border: none; border-radius: 10px;
+  background: #06c755; color: #fff; font-size: 1rem; font-weight: 700;
+  cursor: pointer; font-family: Kanit, sans-serif; margin-bottom: .7rem;
+  transition: background .2s;
+}
+.ud-pendpay-line-btn:hover { background: #05b04a; }
+.ud-pendpay-copy-btn {
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+  width: 100%; padding: .65rem; border: 1.5px solid #ccc; border-radius: 10px;
+  background: none; font-size: .9rem; color: #555; cursor: pointer;
+  font-family: Kanit, sans-serif; margin-bottom: .7rem;
+}
+.ud-pendpay-close {
+  width: 100%; padding: .6rem; border: none; background: none;
+  font-size: .9rem; color: #888; cursor: pointer; font-family: Kanit, sans-serif;
 }
 `;
