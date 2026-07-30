@@ -1,6 +1,7 @@
 import { Request,Response } from "express";
 
 import * as authService from "../services/authService";
+import { requestPasswordReset, resetPassword } from "../services/authService";
 import * as userService from "../services/userService";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
@@ -138,6 +139,26 @@ export async function login(
 
     }
 
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+    await requestPasswordReset(email);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+}
+
+export async function resetPasswordHandler(req: Request, res: Response) {
+  try {
+    const { token, new_password } = req.body;
+    await resetPassword(token, new_password);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
 }
 
 export function logout(
