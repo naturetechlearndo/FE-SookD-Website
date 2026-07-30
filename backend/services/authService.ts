@@ -1,14 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 
 import { getUsers, updateUser } from "./userService";
 
 // in-memory token store: token → { userId, expiry }
 const resetTokens = new Map<string, { userId: string; expiry: number }>();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 export async function requestPasswordReset(email: string): Promise<void> {
   const users = await getUsers();
@@ -21,8 +21,8 @@ export async function requestPasswordReset(email: string): Promise<void> {
   const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
   const resetLink = `${frontendUrl}?reset_token=${token}`;
 
-  const { error } = await resend.emails.send({
-    from: "SookD <onboarding@resend.dev>",
+  await sgMail.send({
+    from: "naturetech.learndo@gmail.com",
     to: email,
     subject: "รีเซ็ตรหัสผ่าน SookD",
     html: `
@@ -39,7 +39,6 @@ export async function requestPasswordReset(email: string): Promise<void> {
       </div>
     `,
   });
-  if (error) throw new Error(error.message);
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
