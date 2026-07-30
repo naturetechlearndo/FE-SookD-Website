@@ -442,17 +442,23 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
         <div className="auth-card">
           <h1 className="auth-title">{isTH ? 'ลืมรหัสผ่าน' : 'Forgot Password'}</h1>
           {fpSent ? (
-            <div className="auth-reg-success-banner">
-              <span className="auth-reg-success-banner__icon">✉</span>
-              <div>
-                <p className="auth-reg-success-banner__title">{isTH ? 'ส่งลิงก์เรียบร้อยแล้ว!' : 'Link sent!'}</p>
-                <p className="auth-reg-success-banner__sub">
-                  {isTH
-                    ? `เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${fpEmail} กรุณาตรวจสอบอีเมลและกดลิงก์เพื่อตั้งรหัสผ่านใหม่`
-                    : `We've sent a password reset link to ${fpEmail}. Please check your email and click the link to set a new password.`}
-                </p>
+            <>
+              <div className="auth-reg-success-banner">
+                <span className="auth-reg-success-banner__icon">✉</span>
+                <div>
+                  <p className="auth-reg-success-banner__title">{isTH ? 'ส่งลิงก์เรียบร้อยแล้ว!' : 'Link sent!'}</p>
+                  <p className="auth-reg-success-banner__sub">
+                    {isTH
+                      ? `เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${fpEmail} กรุณาตรวจสอบอีเมลและกดลิงก์เพื่อตั้งรหัสผ่านใหม่`
+                      : `We've sent a password reset link to ${fpEmail}. Please check your email and click the link to set a new password.`}
+                  </p>
+                </div>
               </div>
-            </div>
+              <button className="auth-btn auth-btn--outline auth-btn--full" style={{ marginTop: '.5rem' }}
+                onClick={() => { setFpSent(false); setFpApiErr(''); }}>
+                {isTH ? 'ส่งอีกครั้ง' : 'Resend'}
+              </button>
+            </>
           ) : (
             <>
               <p style={{ textAlign: 'center', fontSize: '.88rem', color: '#666', marginBottom: '1.4rem', lineHeight: 1.55 }}>
