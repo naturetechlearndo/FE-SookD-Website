@@ -1,3 +1,5 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
 import dotenv from "dotenv";
 dotenv.config();
 // console.log("JWT =", process.env.JWT_SECRET);
