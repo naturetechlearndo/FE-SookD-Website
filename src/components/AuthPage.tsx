@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 
-type AuthView = 'login' | 'reg1' | 'reg2';
+type AuthView = 'login' | 'reg1' | 'reg2' | 'forgot';
 
 interface Props {
   onBack: () => void;
@@ -66,6 +66,17 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
   const [regLoading, setRegLoading] = useState(false);
   const [regApiErr, setRegApiErr] = useState('');
   const [regSuccess, setRegSuccess] = useState(false);
+
+  /* ── Forgot password state ── */
+  const [fpEmail, setFpEmail] = useState('');
+  const [fpNewPw, setFpNewPw] = useState('');
+  const [fpConfirm, setFpConfirm] = useState('');
+  const [fpShowPw, setFpShowPw] = useState(false);
+  const [fpShowCfm, setFpShowCfm] = useState(false);
+  const [fpErrs, setFpErrs] = useState<Record<string, string>>({});
+  const [fpLoading, setFpLoading] = useState(false);
+  const [fpApiErr, setFpApiErr] = useState('');
+  const [fpSuccess, setFpSuccess] = useState(false);
 
   /* ── Handlers ── */
   function validateLogin(): boolean {
@@ -161,6 +172,33 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     }
   }
 
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!fpEmail.trim()) errs.email = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fpEmail)) errs.email = isTH ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Invalid email format';
+    if (!fpNewPw) errs.newPw = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
+    if (!fpConfirm) errs.confirm = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
+    else if (fpNewPw && fpConfirm !== fpNewPw) errs.confirm = isTH ? 'รหัสผ่านไม่ตรงกัน' : 'Passwords do not match';
+    setFpErrs(errs);
+    if (Object.keys(errs).length > 0) return;
+    setFpLoading(true);
+    setFpApiErr('');
+    try {
+      const res = await api.auth.forgotPassword({ email: fpEmail, new_password: fpNewPw });
+      if (res.success) {
+        setFpSuccess(true);
+        setView('login');
+      } else {
+        setFpApiErr(res.message ?? (isTH ? 'ไม่พบบัญชีที่ใช้อีเมลนี้' : 'No account found with this email'));
+      }
+    } catch {
+      setFpApiErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้' : 'Cannot connect to server');
+    } finally {
+      setFpLoading(false);
+    }
+  }
+
   function field(
     label: string, key: string, value: string, onChange: (v: string) => void,
     errors: Record<string, string>, opts?: { placeholder?: string; type?: string }
@@ -213,8 +251,17 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
             <div className="auth-reg-success-banner">
               <span className="auth-reg-success-banner__icon">✓</span>
               <div>
-                <p className="auth-reg-success-banner__title">สมัครสมาชิกสำเร็จ!</p>
-                <p className="auth-reg-success-banner__sub">กรุณารอประมาณ 1 นาที เพื่อให้ระบบอัปเดตข้อมูล จากนั้นจึงจะสามารถเข้าสู่ระบบ (Login) ได้ครับ/ค่ะ</p>
+                <p className="auth-reg-success-banner__title">{isTH ? 'สมัครสมาชิกสำเร็จ!' : 'Registration successful!'}</p>
+                <p className="auth-reg-success-banner__sub">{isTH ? 'กรุณารอประมาณ 1 นาที เพื่อให้ระบบอัปเดตข้อมูล จากนั้นจึงจะสามารถเข้าสู่ระบบ (Login) ได้ครับ/ค่ะ' : 'Please wait approximately 1 minute for the system to update, then you can log in.'}</p>
+              </div>
+            </div>
+          )}
+          {fpSuccess && (
+            <div className="auth-reg-success-banner">
+              <span className="auth-reg-success-banner__icon">⏳</span>
+              <div>
+                <p className="auth-reg-success-banner__title">{isTH ? 'กำลังอัปเดทรหัสผ่าน' : 'Updating your password'}</p>
+                <p className="auth-reg-success-banner__sub">{isTH ? 'กรุณารอประมาณ 1 นาที เพื่อให้ระบบอัปเดตข้อมูล จากนั้นจึงจะสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้' : 'Please wait approximately 1 minute for the system to update, then you can log in with your new password.'}</p>
               </div>
             </div>
           )}
@@ -242,6 +289,11 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
                 </button>
               </div>
               <FieldError msg={loginErrs.password} />
+            </div>
+            <div style={{ textAlign: 'right', marginTop: '-.4rem', marginBottom: '.8rem' }}>
+              <button type="button" className="auth-link" onClick={() => { setFpSuccess(false); setFpEmail(''); setFpNewPw(''); setFpConfirm(''); setFpErrs({}); setFpApiErr(''); setView('forgot'); }}>
+                {isTH ? 'ลืมรหัสผ่าน?' : 'Forgot password?'}
+              </button>
             </div>
             {loginApiErr && <p className="auth-api-err">{loginApiErr}</p>}
             <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={loginLoading}>
@@ -347,6 +399,64 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
           <p className="auth-link-row">
             {isTH ? 'มีบัญชีอยู่แล้ว?' : 'Already have an account?'}{' '}
             <button className="auth-link" onClick={() => { (window as any).gtag?.('event', 'click_login_link'); setView('login'); }}>{isTH ? 'เข้าสู่ระบบ' : 'Login'}</button>
+          </p>
+        </div>
+      </div>
+      <Footer data={c.footer[lang]} />
+    </>
+  );
+
+  if (view === 'forgot') return (
+    <>
+      <div className="auth-page">
+        <div className="auth-card">
+          <h1 className="auth-title">{isTH ? 'ลืมรหัสผ่าน' : 'Forgot Password'}</h1>
+          <p style={{ textAlign: 'center', fontSize: '.88rem', color: '#666', marginBottom: '1.4rem', lineHeight: 1.55 }}>
+            {isTH ? 'กรอกอีเมลที่ใช้สมัครสมาชิกและรหัสผ่านใหม่ของคุณ' : 'Enter your registered email and your new password.'}
+          </p>
+          <form onSubmit={handleForgotPassword} noValidate>
+            <div className="auth-field">
+              <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
+              <input className={`auth-input${fpErrs.email ? ' auth-input--err' : ''}`}
+                type="email" placeholder="example@gmail.com"
+                value={fpEmail} onChange={e => setFpEmail(e.target.value)} />
+              <FieldError msg={fpErrs.email} />
+            </div>
+            <div className="auth-field">
+              <label className="auth-field__label">{isTH ? 'รหัสผ่านใหม่' : 'New Password'}</label>
+              <div className="auth-pw-wrap">
+                <input className={`auth-input${fpErrs.newPw ? ' auth-input--err' : ''}`}
+                  type={fpShowPw ? 'text' : 'password'}
+                  placeholder={isTH ? 'กรอกรหัสผ่านใหม่' : 'Enter new password'}
+                  value={fpNewPw} onChange={e => setFpNewPw(e.target.value)} />
+                <button type="button" className="auth-pw-eye" onClick={() => setFpShowPw(v => !v)}>
+                  <EyeIcon open={fpShowPw} />
+                </button>
+              </div>
+              <FieldError msg={fpErrs.newPw} />
+            </div>
+            <div className="auth-field">
+              <label className="auth-field__label">{isTH ? 'ยืนยันรหัสผ่านใหม่' : 'Confirm New Password'}</label>
+              <div className="auth-pw-wrap">
+                <input className={`auth-input${fpErrs.confirm ? ' auth-input--err' : ''}`}
+                  type={fpShowCfm ? 'text' : 'password'}
+                  placeholder={isTH ? 'กรอกรหัสผ่านอีกครั้ง' : 'Confirm your new password'}
+                  value={fpConfirm} onChange={e => setFpConfirm(e.target.value)} />
+                <button type="button" className="auth-pw-eye" onClick={() => setFpShowCfm(v => !v)}>
+                  <EyeIcon open={fpShowCfm} />
+                </button>
+              </div>
+              <FieldError msg={fpErrs.confirm} />
+            </div>
+            {fpApiErr && <p className="auth-api-err">{fpApiErr}</p>}
+            <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={fpLoading}>
+              {fpLoading ? (isTH ? 'กำลังดำเนินการ...' : 'Processing...') : (isTH ? 'เปลี่ยนรหัสผ่าน' : 'Change Password')}
+            </button>
+          </form>
+          <p className="auth-link-row">
+            <button className="auth-link" onClick={() => setView('login')}>
+              {isTH ? '← กลับไปเข้าสู่ระบบ' : '← Back to login'}
+            </button>
           </p>
         </div>
       </div>

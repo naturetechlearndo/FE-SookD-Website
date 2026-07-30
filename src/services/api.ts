@@ -56,6 +56,12 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       }).then(r => r.json()),
+    forgotPassword: (body: { email: string; new_password: string }) =>
+      fetch(`${BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
   },
   activities: {
     getAll: () => get<any[]>('/activities'),
