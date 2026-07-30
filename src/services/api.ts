@@ -56,8 +56,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       }).then(r => r.json()),
-    forgotPassword: (body: { email: string; new_password: string }) =>
+    requestPasswordReset: (body: { email: string }) =>
       fetch(`${BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()),
+    resetPassword: (body: { token: string; new_password: string }) =>
+      fetch(`${BASE_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

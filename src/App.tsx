@@ -38,6 +38,7 @@ export default function App() {
   const [orderData, setOrderData] = useState<any>(null);
   const [lang, setLang] = useState<'TH' | 'ENG'>('TH');
   const [cartCount, setCartCount] = useState(0);
+  const [resetToken] = useState(() => new URLSearchParams(window.location.search).get('reset_token') ?? '');
 
   useEffect(() => {
     const update = () => setCartCount(getCart().length);
@@ -58,6 +59,13 @@ export default function App() {
     // ============= sessionCheck ========//
     getSessionId();
     // ================================= //
+
+    /* ── password reset link ── */
+    if (new URLSearchParams(window.location.search).get('reset_token')) {
+      setPage('login');
+      window.history.replaceState({ page: 'login' }, '');
+      return;
+    }
 
     const existingState = window.history.state;
     if (existingState?.page) {
@@ -156,6 +164,8 @@ export default function App() {
           onBack={() => navigate('home')}
           onLoginSuccess={(user) => { localStorage.setItem('sookd_user', JSON.stringify(user)); setCurrentUser(user); navigate('home'); }}
           lang={lang}
+          initialView={resetToken ? 'reset' : 'login'}
+          initialResetToken={resetToken}
         />
       ) : page === 'product-detail' ? (
         <ProductDetailPage productId={selectedProductId} onBack={() => { setOrderData(null); setPage(prevPage); }} onSelectProduct={(id) => openProduct(id, prevPage)} orderData={orderData} onNavigate={navigate} currentUser={currentUser} lang={lang} />

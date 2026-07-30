@@ -3,12 +3,13 @@ import { api } from '../services/api';
 import Footer from './Footer';
 import { SITE_CONTENT as c } from '../constants/content';
 
-type AuthView = 'login' | 'reg1' | 'reg2' | 'forgot';
+type AuthView = 'login' | 'reg1' | 'reg2' | 'forgot' | 'reset';
 
 interface Props {
   onBack: () => void;
   onLoginSuccess?: (user: any) => void;
   initialView?: AuthView;
+  initialResetToken?: string;
   lang?: 'TH' | 'ENG';
 }
 
@@ -36,7 +37,7 @@ function FieldError({ msg }: { msg?: string }) {
   return <p className="auth-field__err">{msg}</p>;
 }
 
-export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login', lang = 'TH' }: Props) {
+export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login', initialResetToken = '', lang = 'TH' }: Props) {
   const isTH = lang === 'TH';
   const [view, setView] = useState<AuthView>(initialView);
 
@@ -69,13 +70,19 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
 
   /* ── Forgot password state ── */
   const [fpEmail, setFpEmail] = useState('');
-  const [fpNewPw, setFpNewPw] = useState('');
-  const [fpConfirm, setFpConfirm] = useState('');
-  const [fpShowPw, setFpShowPw] = useState(false);
-  const [fpShowCfm, setFpShowCfm] = useState(false);
   const [fpErrs, setFpErrs] = useState<Record<string, string>>({});
   const [fpLoading, setFpLoading] = useState(false);
   const [fpApiErr, setFpApiErr] = useState('');
+  const [fpSent, setFpSent] = useState(false);
+  /* ── Reset password state ── */
+  const [resetToken] = useState(initialResetToken);
+  const [rpNewPw, setRpNewPw] = useState('');
+  const [rpConfirm, setRpConfirm] = useState('');
+  const [rpShowPw, setRpShowPw] = useState(false);
+  const [rpShowCfm, setRpShowCfm] = useState(false);
+  const [rpErrs, setRpErrs] = useState<Record<string, string>>({});
+  const [rpLoading, setRpLoading] = useState(false);
+  const [rpApiErr, setRpApiErr] = useState('');
   const [fpSuccess, setFpSuccess] = useState(false);
 
   /* ── Handlers ── */
@@ -177,18 +184,14 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
     const errs: Record<string, string> = {};
     if (!fpEmail.trim()) errs.email = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fpEmail)) errs.email = isTH ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Invalid email format';
-    if (!fpNewPw) errs.newPw = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
-    if (!fpConfirm) errs.confirm = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
-    else if (fpNewPw && fpConfirm !== fpNewPw) errs.confirm = isTH ? 'รหัสผ่านไม่ตรงกัน' : 'Passwords do not match';
     setFpErrs(errs);
     if (Object.keys(errs).length > 0) return;
     setFpLoading(true);
     setFpApiErr('');
     try {
-      const res = await api.auth.forgotPassword({ email: fpEmail, new_password: fpNewPw });
+      const res = await api.auth.requestPasswordReset({ email: fpEmail });
       if (res.success) {
-        setFpSuccess(true);
-        setView('login');
+        setFpSent(true);
       } else {
         setFpApiErr(res.message ?? (isTH ? 'ไม่พบบัญชีที่ใช้อีเมลนี้' : 'No account found with this email'));
       }
@@ -196,6 +199,33 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
       setFpApiErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้' : 'Cannot connect to server');
     } finally {
       setFpLoading(false);
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!rpNewPw) errs.newPw = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
+    if (!rpConfirm) errs.confirm = isTH ? 'กรุณากรอกข้อมูลในช่องว่าง' : 'Please fill in this field';
+    else if (rpNewPw && rpConfirm !== rpNewPw) errs.confirm = isTH ? 'รหัสผ่านไม่ตรงกัน' : 'Passwords do not match';
+    setRpErrs(errs);
+    if (Object.keys(errs).length > 0) return;
+    setRpLoading(true);
+    setRpApiErr('');
+    try {
+      const res = await api.auth.resetPassword({ token: resetToken, new_password: rpNewPw });
+      if (res.success) {
+        setFpSuccess(true);
+        setView('login');
+        /* ล้าง token ออกจาก URL โดยไม่ reload */
+        window.history.replaceState({ page: 'login' }, '', window.location.pathname);
+      } else {
+        setRpApiErr(res.message ?? (isTH ? 'ลิงก์หมดอายุหรือไม่ถูกต้อง' : 'Link has expired or is invalid'));
+      }
+    } catch {
+      setRpApiErr(isTH ? 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้' : 'Cannot connect to server');
+    } finally {
+      setRpLoading(false);
     }
   }
 
@@ -291,7 +321,7 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
               <FieldError msg={loginErrs.password} />
             </div>
             <div style={{ textAlign: 'right', marginTop: '-.4rem', marginBottom: '.8rem' }}>
-              <button type="button" className="auth-link" onClick={() => { setFpSuccess(false); setFpEmail(''); setFpNewPw(''); setFpConfirm(''); setFpErrs({}); setFpApiErr(''); setView('forgot'); }}>
+              <button type="button" className="auth-link" onClick={() => { setFpSuccess(false); setFpEmail(''); setFpSent(false); setFpErrs({}); setFpApiErr(''); setView('forgot'); }}>
                 {isTH ? 'ลืมรหัสผ่าน?' : 'Forgot password?'}
               </button>
             </div>
@@ -411,53 +441,86 @@ export default function AuthPage({ onBack, onLoginSuccess, initialView = 'login'
       <div className="auth-page">
         <div className="auth-card">
           <h1 className="auth-title">{isTH ? 'ลืมรหัสผ่าน' : 'Forgot Password'}</h1>
-          <p style={{ textAlign: 'center', fontSize: '.88rem', color: '#666', marginBottom: '1.4rem', lineHeight: 1.55 }}>
-            {isTH ? 'กรอกอีเมลที่ใช้สมัครสมาชิกและรหัสผ่านใหม่ของคุณ' : 'Enter your registered email and your new password.'}
-          </p>
-          <form onSubmit={handleForgotPassword} noValidate>
-            <div className="auth-field">
-              <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
-              <input className={`auth-input${fpErrs.email ? ' auth-input--err' : ''}`}
-                type="email" placeholder="example@gmail.com"
-                value={fpEmail} onChange={e => setFpEmail(e.target.value)} />
-              <FieldError msg={fpErrs.email} />
-            </div>
-            <div className="auth-field">
-              <label className="auth-field__label">{isTH ? 'รหัสผ่านใหม่' : 'New Password'}</label>
-              <div className="auth-pw-wrap">
-                <input className={`auth-input${fpErrs.newPw ? ' auth-input--err' : ''}`}
-                  type={fpShowPw ? 'text' : 'password'}
-                  placeholder={isTH ? 'กรอกรหัสผ่านใหม่' : 'Enter new password'}
-                  value={fpNewPw} onChange={e => setFpNewPw(e.target.value)} />
-                <button type="button" className="auth-pw-eye" onClick={() => setFpShowPw(v => !v)}>
-                  <EyeIcon open={fpShowPw} />
-                </button>
+          {fpSent ? (
+            <div className="auth-reg-success-banner">
+              <span className="auth-reg-success-banner__icon">✉</span>
+              <div>
+                <p className="auth-reg-success-banner__title">{isTH ? 'ส่งลิงก์เรียบร้อยแล้ว!' : 'Link sent!'}</p>
+                <p className="auth-reg-success-banner__sub">
+                  {isTH
+                    ? `เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${fpEmail} กรุณาตรวจสอบอีเมลและกดลิงก์เพื่อตั้งรหัสผ่านใหม่`
+                    : `We've sent a password reset link to ${fpEmail}. Please check your email and click the link to set a new password.`}
+                </p>
               </div>
-              <FieldError msg={fpErrs.newPw} />
             </div>
-            <div className="auth-field">
-              <label className="auth-field__label">{isTH ? 'ยืนยันรหัสผ่านใหม่' : 'Confirm New Password'}</label>
-              <div className="auth-pw-wrap">
-                <input className={`auth-input${fpErrs.confirm ? ' auth-input--err' : ''}`}
-                  type={fpShowCfm ? 'text' : 'password'}
-                  placeholder={isTH ? 'กรอกรหัสผ่านอีกครั้ง' : 'Confirm your new password'}
-                  value={fpConfirm} onChange={e => setFpConfirm(e.target.value)} />
-                <button type="button" className="auth-pw-eye" onClick={() => setFpShowCfm(v => !v)}>
-                  <EyeIcon open={fpShowCfm} />
+          ) : (
+            <>
+              <p style={{ textAlign: 'center', fontSize: '.88rem', color: '#666', marginBottom: '1.4rem', lineHeight: 1.55 }}>
+                {isTH ? 'กรอกอีเมลที่ใช้สมัครสมาชิก เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้' : 'Enter your registered email and we\'ll send you a password reset link.'}
+              </p>
+              <form onSubmit={handleForgotPassword} noValidate>
+                <div className="auth-field">
+                  <label className="auth-field__label">{isTH ? 'อีเมลล์' : 'Email'}</label>
+                  <input className={`auth-input${fpErrs.email ? ' auth-input--err' : ''}`}
+                    type="email" placeholder="example@gmail.com"
+                    value={fpEmail} onChange={e => setFpEmail(e.target.value)} />
+                  <FieldError msg={fpErrs.email} />
+                </div>
+                {fpApiErr && <p className="auth-api-err">{fpApiErr}</p>}
+                <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={fpLoading}>
+                  {fpLoading ? (isTH ? 'กำลังส่ง...' : 'Sending...') : (isTH ? 'ส่งลิงก์รีเซ็ตรหัสผ่าน' : 'Send Reset Link')}
                 </button>
-              </div>
-              <FieldError msg={fpErrs.confirm} />
-            </div>
-            {fpApiErr && <p className="auth-api-err">{fpApiErr}</p>}
-            <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={fpLoading}>
-              {fpLoading ? (isTH ? 'กำลังดำเนินการ...' : 'Processing...') : (isTH ? 'เปลี่ยนรหัสผ่าน' : 'Change Password')}
-            </button>
-          </form>
+              </form>
+            </>
+          )}
           <p className="auth-link-row">
             <button className="auth-link" onClick={() => setView('login')}>
               {isTH ? '← กลับไปเข้าสู่ระบบ' : '← Back to login'}
             </button>
           </p>
+        </div>
+      </div>
+      <Footer data={c.footer[lang]} />
+    </>
+  );
+
+  if (view === 'reset') return (
+    <>
+      <div className="auth-page">
+        <div className="auth-card">
+          <h1 className="auth-title">{isTH ? 'ตั้งรหัสผ่านใหม่' : 'Set New Password'}</h1>
+          <form onSubmit={handleResetPassword} noValidate>
+            <div className="auth-field">
+              <label className="auth-field__label">{isTH ? 'รหัสผ่านใหม่' : 'New Password'}</label>
+              <div className="auth-pw-wrap">
+                <input className={`auth-input${rpErrs.newPw ? ' auth-input--err' : ''}`}
+                  type={rpShowPw ? 'text' : 'password'}
+                  placeholder={isTH ? 'กรอกรหัสผ่านใหม่' : 'Enter new password'}
+                  value={rpNewPw} onChange={e => setRpNewPw(e.target.value)} />
+                <button type="button" className="auth-pw-eye" onClick={() => setRpShowPw(v => !v)}>
+                  <EyeIcon open={rpShowPw} />
+                </button>
+              </div>
+              <FieldError msg={rpErrs.newPw} />
+            </div>
+            <div className="auth-field">
+              <label className="auth-field__label">{isTH ? 'ยืนยันรหัสผ่านใหม่' : 'Confirm New Password'}</label>
+              <div className="auth-pw-wrap">
+                <input className={`auth-input${rpErrs.confirm ? ' auth-input--err' : ''}`}
+                  type={rpShowCfm ? 'text' : 'password'}
+                  placeholder={isTH ? 'กรอกรหัสผ่านอีกครั้ง' : 'Confirm your new password'}
+                  value={rpConfirm} onChange={e => setRpConfirm(e.target.value)} />
+                <button type="button" className="auth-pw-eye" onClick={() => setRpShowCfm(v => !v)}>
+                  <EyeIcon open={rpShowCfm} />
+                </button>
+              </div>
+              <FieldError msg={rpErrs.confirm} />
+            </div>
+            {rpApiErr && <p className="auth-api-err">{rpApiErr}</p>}
+            <button className="auth-btn auth-btn--primary auth-btn--full" type="submit" disabled={rpLoading}>
+              {rpLoading ? (isTH ? 'กำลังบันทึก...' : 'Saving...') : (isTH ? 'บันทึกรหัสผ่านใหม่' : 'Save New Password')}
+            </button>
+          </form>
         </div>
       </div>
       <Footer data={c.footer[lang]} />
