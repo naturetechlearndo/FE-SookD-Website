@@ -24,7 +24,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   await sgMail.send({
     from: "naturetech.learndo@gmail.com",
     to: email,
-    subject: "รีเซ็ตรหัสผ่าน SookD",
+    subject: "รีเซ็ตรหัสผ่าน Tramony",
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto">
         <h2 style="color:#2d6a4f">รีเซ็ตรหัสผ่าน</h2>
