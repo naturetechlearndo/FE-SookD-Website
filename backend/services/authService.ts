@@ -21,7 +21,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
   const resetLink = `${frontendUrl}?reset_token=${token}`;
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: "SookD <onboarding@resend.dev>",
     to: email,
     subject: "รีเซ็ตรหัสผ่าน SookD",
@@ -39,6 +39,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
       </div>
     `,
   });
+  if (error) throw new Error(error.message);
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
