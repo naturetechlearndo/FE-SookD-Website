@@ -9,7 +9,10 @@ import { getUsers, updateUser } from "./userService";
 const resetTokens = new Map<string, { userId: string; expiry: number }>();
 
 const mailer = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  family: 4,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
