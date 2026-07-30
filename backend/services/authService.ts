@@ -1,23 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 import { getUsers, updateUser } from "./userService";
 
 // in-memory token store: token → { userId, expiry }
 const resetTokens = new Map<string, { userId: string; expiry: number }>();
 
-const mailer = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function requestPasswordReset(email: string): Promise<void> {
   const users = await getUsers();
@@ -30,8 +21,8 @@ export async function requestPasswordReset(email: string): Promise<void> {
   const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
   const resetLink = `${frontendUrl}?reset_token=${token}`;
 
-  await mailer.sendMail({
-    from: `"SookD" <${process.env.MAIL_USER}>`,
+  await resend.emails.send({
+    from: "SookD <onboarding@resend.dev>",
     to: email,
     subject: "รีเซ็ตรหัสผ่าน SookD",
     html: `
